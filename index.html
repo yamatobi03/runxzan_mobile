@@ -202,7 +202,8 @@
 <audio id="se-correct" src="決定ボタンを押す53.mp3"></audio>
 <audio id="se-wrong" src="ビープ音4.mp3"></audio>
 
-<h1>↑↓でレーン移動！</h1>
+<h1>↑↑でレーン移動！　→で加速</h1>
+<!-- <h2>→で加速</h2> -->
 <div id="question">答えが <span id="target">?</span> になる式を選ぼう！</div>
 <div id="distance" style="font-size: 18px; margin-top: 5px;">00000m</div>
 <div id="lives">❤️❤️❤️</div>
@@ -243,7 +244,6 @@ const backgrounds = [
 ];
 let backgroundIndex = 0;
 let currentLane = 1;
-let speed = 2;
 let score = 0;
 let targetAnswer = 0;
 let lives = 3;
@@ -282,20 +282,61 @@ function selectSkin(skinFile) {
 
 player.style.top = lanes[currentLane] + "px";
 
+// ゲームの初期速度
+const INITIAL_GAME_SPEED = 2; 
+let speed = INITIAL_GAME_SPEED; // 現在のゲーム速度 (実際に障害物の移動に使われる変数)
+let baseGameSpeed = INITIAL_GAME_SPEED; // スコアに応じて永続的に変化する「基準」となるゲーム速度
+
+// BGMの初期再生レート
+const INITIAL_BGM_PLAYBACK_RATE = 1.0; 
+let currentBaseBGMPlaybackRate = INITIAL_BGM_PLAYBACK_RATE; // スコアに応じて永続的に変化するBGMの基準レート
+
+let isAccelerating = false; // 加速中かどうかのフラグ
+
 // ▼ 最初のキー押しでBGM再生＋プレイヤー移動
 document.addEventListener("keydown", (e) => {
     if (!started) {
         bgm.volume = 0.1;
-        bgm.play().catch(e => console.log("BGM再生失敗", e));
+        bgm.play().catch(error => console.log("BGM再生失敗", error));
         started = true;
+        bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE; // ゲーム開始時にBGMレートを設定
     }
+
     if (e.key === "ArrowUp" && currentLane > 0) {
         currentLane--;
     } else if (e.key === "ArrowDown" && currentLane < 2) {
         currentLane++;
+    } 
+    else if (e.key === "ArrowRight" && !isAccelerating) {
+        // baseGameSpeed（現在の基準速度）を2倍にして speed に設定
+        speed = baseGameSpeed * 2; 
+        bgm.playbackRate = currentBaseBGMPlaybackRate * 2; // BGMも2倍速にする
+
+        isAccelerating = true;
+        console.log("Speed doubled! Current speed:", speed);
+        console.log("BGM playback rate doubled! New rate:", bgm.playbackRate);
     }
+
     player.style.top = lanes[currentLane] + "px";
 });
+
+
+// --- ★キーを離した時のイベントリスナーを追加★ ---
+document.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowRight" && isAccelerating) {
+        // speed を baseGameSpeed（現在の基準速度）に戻す
+        speed = baseGameSpeed; 
+        // BGMも currentBaseBGMPlaybackRate（現在の基準レート）に戻す
+        bgm.playbackRate = currentBaseBGMPlaybackRate; 
+
+        isAccelerating = false;
+        console.log("Speed returned to normal! Current speed:", speed);
+        console.log("BGM playback rate returned to normal! Current rate:", bgm.playbackRate);
+
+        // 必要であれば、減速SEや視覚エフェクトをここで追加
+    }
+});
+
 
 // ▼ ゲーム開始ボタン
 document.getElementById("start-button").addEventListener("click", function() {
@@ -389,7 +430,7 @@ function spawnChallenge() {
 
         let pos = 800;
         const move = setInterval(() => {
-            pos -= speed;
+            pos -= speed; // ここで current speed (baseGameSpeed またはその2倍) が使われる
             obstacle.style.left = pos + "px";
 
             if (pos < 100 && pos + 100 > 50 && i === currentLane) {
@@ -416,8 +457,20 @@ function spawnChallenge() {
                     }
 
                     if (score % 2 === 0){
-                        speed += (score <= 6) ? 0.45 : (score <= 14) ? 0.38 : (score < 30) ? 0.15 : 0.10;
-                        bgm.playbackRate += 0.025;
+                        // ★ここが主な変更点★
+                        // ゲームの「基準となるスピード」を上げる
+                        baseGameSpeed += (score <= 6) ? 0.45 : (score <= 14) ? 0.38 : (score < 30) ? 0.15 : 0.1;
+                        
+                        // BGMの「基準となるレート」を上げる
+                        currentBaseBGMPlaybackRate += 0.015;
+                        
+                        // もし現在加速中でなければ、実際に使用される speed と bgm.playbackRate を基準値に更新
+                        // 加速中の場合は、speed と bgm.playbackRate は加速した状態を維持する
+                        // キーアップ時に baseGameSpeed と currentBaseBGMPlaybackRate に戻る
+                        if (!isAccelerating) {
+                            speed = baseGameSpeed; // 実際に障害物移動に使う speed も更新
+                            bgm.playbackRate = currentBaseBGMPlaybackRate;
+                        }
                     }
 
                     if (score % 10 === 0) {
@@ -462,12 +515,13 @@ function spawnChallenge() {
                         return;
                     }
                 }
+                // 問題が出現するまでの間隔も current speed に応じて変化
                 setTimeout(() => {
                     isSpawning = false;
                     spawnChallenge();
-                }, 4 * 1000 / speed); // ここをしっかり修正！！
+                }, 4 * 1000 / speed); 
             }
-        }, 20);
+        }, 20); // 障害物の移動間隔
     });
 }
 
