@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.85">
+  <meta name="description" content="計算で加速！走り続ける脳トレアクションゲーム - 計算疾走！RUN×算">
+  <title>計算疾走！RUN×算</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<style>
+    body { font-family: sans-serif; background: #eef; text-align: center; margin: 0; overflow: hidden; }
+    /* タイトル画面 */
+    #title-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #e0f7fa;
+    }
+    #title-screen h1 {
+        font-size: 50px;
+        color: #333;
+    }
+    #start-button {
+        margin-top: 20px;
+        padding: 15px 30px;
+        font-size: 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    #start-button:hover {
+        background-color: #45a049;
+    }
+    #ranking-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-left: 0;
+        list-style: none;
+    }
+    #ranking-list li {
+        margin: 6px 0;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+    }
+    #ranking-modal button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 18px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    #ranking-modal button:hover {
+        background: #45a049;
+    }
+    #game {
+    position: relative;
+    aspect-ratio: 8 / 3; /* ← 800:300 の比率 */
+    width: 800px;    
+    background: url('上空.jpg') repeat-x center center;
+    background-size: cover;
+    border: 2px solid #000;
+    margin: 20px auto;
+    overflow: hidden;
+    background-position: 0 0;
+    }
+
+    #game.fade {
+        transition: opacity 0.3s ease;
+        opacity: 0;
+    }
+    #lives {
+        height: 40px; /* 表示中のハートの高さくらいに合わせる */
+        font-size: 24px;
+        line-height: 40px;
+    }
+    .lane {
+        position: absolute; width: 100%; height: 100px; border-top: 1px solid #ccc;
+    }
+    #player {
+        position: absolute; 
+        left: 50px; 
+        width: 50px; 
+        height: 50px;
+        background: url('type_zero_anf.gif') no-repeat center center;
+        background-size: 90%; /* GIF画像がプレイヤーサイズにフィットするように */
+        transition: top 0.1s;
+    }
+    .obstacle {
+        position: absolute;
+        width: 100px;
+        height: 50px;
+        background: rgba(173, 216, 230, 0.85); /* 半透明の水色 */
+        font-size: 22px;                       /* 少し大きく */
+        text-align: center;
+        line-height: 50px;
+        font-weight: bold;
+        font-family: "Consolas", "Courier New", monospace;
+        transform: translateZ(0);
+        will-change: transform;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+
+        /* 境界をはっきりさせる */
+        border: 2px solid #007acc;
+        border-radius: 8px;
+
+        /* 影をつけて視認性UP */
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+
+        /* 文字にも影を追加して明瞭に */
+        color: #fff;
+        text-shadow: 1px 1px 2px #000;
+    }
+    #target {
+    font-size: 36px;
+    color: #d32f2f; /* 赤系で目立つ */
+    font-weight: bold;
+    padding: 0 10px;
+    border-radius: 5px;
+    }
+    #question {
+        font-size: 24px; margin-top: 10px;
+    }
+    .game {
+        transition: opacity 1.5s ease-out, background-image 1.5s ease-out;
+        will-change: opacity, background-image;
+    }
+
+    /* 必要に応じてフェード用の追加クラス（現在の実装を活かす場合） */
+    .fade {
+        opacity: 0.7;
+        transition: opacity 0.3s ease-in-out;
+    }
+    #score {
+        font-size: 18px;
+    }
+    /* コンボゲージ全体 */
+    #combo-bar-container {
+        width: 300px;
+        height: 25px;
+        background-color: #ccc;
+        border-radius: 15px;
+        margin: 10px auto;
+        overflow: hidden;
+        border: 2px solid #333;
+    }
+
+    /* 実際に伸びるゲージ */
+    #combo-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        transition: width 0.2s ease;
+    }
+    @keyframes flashCombo {
+    0%, 100% { background-color: #4CAF50; }
+    50% { background-color: gold; }
+    }
+    .combo-flash {
+        animation: flashCombo 0.5s ease;
+    }
+
+</style>
+<body>
+
+    <!-- タイトル画面 -->
+    <div id="title-screen">
+        <h1>計算疾走！RUN×算</h1>
+        <button id="start-button">ゲームスタート</button>
+        <button id="adult-mode-button" style="margin-top: 10px; padding: 15px 30px; font-size: 20px; background-color: #f44336; color: white; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.3s;">オトナモード</button>
+        <!-- スキン選択モーダル -->
+        <div id="skin-select" style="margin-top: 20px;">
+            <p style="font-size: 20px;">スキンを選ぼう！</p>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <img src="type_zero_anf.gif" class="skin-option" onclick="selectSkin('type_zero_anf.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="fighter_3body_an.gif" class="skin-option" onclick="selectSkin('fighter_3body_an.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="fighter_f104_an.gif" class="skin-option" onclick="selectSkin('fighter_f104_an.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="bird18.gif" class="skin-option" onclick="selectSkin('bird18.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="karasu.gif" class="skin-option" onclick="selectSkin('karasu.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <!-- <img src="chiken.gif" class="skin-option" onclick="selectSkin('chiken.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="dog.gif" class="skin-option" onclick="selectSkin('dog.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;"> -->
+                <img src="angel.gif" class="skin-option" onclick="selectSkin('angel.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="ufo.gif" class="skin-option" onclick="selectSkin('ufo.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+            </div>
+        </div>
+    </div>
+    
+<!-- BGMとSEをここにまとめて配置 -->
+<audio id="bgm" src="8ビットの冒険.mp3" loop></audio>
+<audio id="se-correct" src="決定ボタンを押す53.mp3"></audio>
+<audio id="se-wrong" src="ビープ音4.mp3"></audio>
+
+<h1>↑↓でレーン移動！</h1>
+<div id="question">答えが <span id="target">?</span> になる式を選ぼう！</div>
+<div id="distance" style="font-size: 18px; margin-top: 5px;">00000m</div>
+<div id="lives">❤️❤️❤️</div>
+<div id="combo-bar-container">
+    <div id="combo-bar"></div>
+</div>
+<div id="game">
+    <div id="player"></div>
+    <div id="ranking-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+        background:white; padding:30px; border:2px solid #000; border-radius:20px; z-index:1000;">
+        <h2>🏁 GAME OVER！</h2>
+        <p id="final-score">あなたのスコア: 0</p>
+        <h3>🏆 ランキング</h3>
+        <ol id="ranking-list" style="text-align:left; padding-left: 20px;"></ol>
+        <button onclick="restartGame()">リトライ</button>
+        <button onclick="returnToTitle()">タイトル画面に戻る</button>
+    </div>
+</div>
+
+
+<!-- 背景ぼかし用 -->
+<div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.5); z-index:1000;"></div>
+
+<script>
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+const targetSpan = document.getElementById("target");
+const livesDisplay = document.getElementById("lives");
+
+const bgm = document.getElementById("bgm");
+const seCorrect = document.getElementById("se-correct");
+const seWrong = document.getElementById("se-wrong");
+
+const lanes = [25, 125, 225]; // Y座標
+const backgrounds = [
+    "上空.jpg", "夕方.jpg", "夜.jpg"
+];
+let backgroundIndex = 0;
+let currentLane = 1;
+let speed = 2;
+let score = 0;
+let targetAnswer = 0;
+let lives = 3;
+let isSpawning = false;
+let hasAnswered = false;
+let started = false; // BGM再生フラグ
+// ▼ 背景スクロール
+let bgPos = 0;
+let distance = 0; // 移動距離
+setInterval(() => {
+    // 背景移動
+    bgPos -= speed / 2;
+    game.style.backgroundPosition = `${bgPos}px 0`;
+
+    // 距離加算（speedに比例）
+    distance += speed  * 0.01;
+    const formattedDistance = Math.floor(distance).toString().padStart(5, '0') + 'm';
+    document.getElementById('distance').textContent = formattedDistance;
+
+}, 20);
+
+let selectedSkin = 'type_zero_anf.gif'; // デフォルト
+function selectSkin(skinFile) {
+    selectedSkin = skinFile;
+    player.style.backgroundImage = `url('${selectedSkin}')`;
+
+    // 全部リセットしてから選んだやつだけ枠線つける
+    document.querySelectorAll('.skin-option').forEach(img => {
+        img.style.border = '2px solid transparent';
+    });
+    const selectedImg = Array.from(document.querySelectorAll('.skin-option')).find(img => img.src.includes(skinFile));
+    if (selectedImg) {
+        selectedImg.style.border = '2px solid #4CAF50';
+    }
+}
+
+player.style.top = lanes[currentLane] + "px";
+
+// ▼ 最初のキー押しでBGM再生＋プレイヤー移動
+document.addEventListener("keydown", (e) => {
+    if (!started) {
+        bgm.volume = 0.1;
+        bgm.play().catch(e => console.log("BGM再生失敗", e));
+        started = true;
+    }
+    if (e.key === "ArrowUp" && currentLane > 0) {
+        currentLane--;
+    } else if (e.key === "ArrowDown" && currentLane < 2) {
+        currentLane++;
+    }
+    player.style.top = lanes[currentLane] + "px";
+});
+
+// ▼ ゲーム開始ボタン
+document.getElementById("start-button").addEventListener("click", function() {
+    document.getElementById("title-screen").style.display = "none";
+    game.style.display = "block";
+    player.style.backgroundImage = `url('${selectedSkin}')`; // ←これ追加！
+    distance = 0;
+    isAdultMode = false;
+    spawnChallenge();
+});
+document.getElementById('adult-mode-button').addEventListener('click', () => {
+    document.getElementById("title-screen").style.display = "none";
+    game.style.display = "block";
+    player.style.backgroundImage = `url('${selectedSkin}')`; // ←これ追加！
+    distance = 0;
+    isAdultMode = true;
+    spawnChallenge(); // startGame関数を呼び出す
+});
+
+// ▼ 式をランダム生成
+function generateExpressions() {
+    const ops = ["+", "-", "*", "/"];
+    const expressions = [];
+    if (isAdultMode){
+        const a = Math.floor(Math.random() * 50) + 1;
+        const b = Math.floor(Math.random() * 50) + 1;
+        const op = ops[Math.floor(Math.random() * ops.length)];
+        const expr = `${a}${op}${b}`;
+        const answer = eval(expr);
+        if (op === "/" && a % b !== 0) return generateExpressions(); // 再生成
+
+        targetAnswer = answer;
+        expressions.push(expr);
+
+        while (expressions.length < 3) {
+            const a2 = Math.floor(Math.random() * 50) + 1;
+            const b2 = Math.floor(Math.random() * 50) + 1;
+            const op2 = ops[Math.floor(Math.random() * ops.length)];
+            const expr2 = `${a2}${op2}${b2}`;
+            let res2;
+            try { res2 = eval(expr2); } catch { continue; }
+            if (res2 !== targetAnswer && Number.isFinite(res2)) {
+                expressions.push(expr2);
+            }
+        }
+    }
+    else{
+        const a = Math.floor(Math.random() * 9) + 1;
+        const b = Math.floor(Math.random() * 9) + 1;
+        const op = ops[Math.floor(Math.random() * ops.length)];
+        const expr = `${a}${op}${b}`;
+        const answer = eval(expr);
+        if (op === "/" && a % b !== 0) return generateExpressions(); // 再生成
+        
+        targetAnswer = answer;
+        expressions.push(expr);
+        
+        while (expressions.length < 3) {
+            const a2 = Math.floor(Math.random() * 9) + 1;
+            const b2 = Math.floor(Math.random() * 9) + 1;
+            const op2 = ops[Math.floor(Math.random() * ops.length)];
+            const expr2 = `${a2}${op2}${b2}`;
+            let res2;
+            try { res2 = eval(expr2); } catch { continue; }
+            if (res2 !== targetAnswer && Number.isFinite(res2)) {
+                expressions.push(expr2);
+            }
+        }            
+    }
+    return expressions.sort(() => Math.random() - 0.5);
+}
+
+// ▼ 問題を出す
+function spawnChallenge() {
+    if (isSpawning) return;
+    isSpawning = true;
+    hasAnswered = false;
+
+    const expressions = generateExpressions();
+    targetSpan.textContent = targetAnswer;
+
+    const correctLane = expressions.findIndex(e => eval(e) === targetAnswer);
+
+    expressions.forEach((expr, i) => {
+        const obstacle = document.createElement("div");
+        obstacle.className = "obstacle";
+        obstacle.textContent = expr.replace('*', 'ｘ').replace('/', '／').replace('+', '＋').replace('-', 'ー');
+        obstacle.style.top = lanes[i] + "px";
+        obstacle.style.left = "800px";
+        game.appendChild(obstacle);
+
+        let pos = 800;
+        const move = setInterval(() => {
+            pos -= speed;
+            obstacle.style.left = pos + "px";
+
+            if (pos < 100 && pos + 100 > 50 && i === currentLane) {
+                if (hasAnswered) return;
+
+                hasAnswered = true;
+                clearInterval(move);
+                game.removeChild(obstacle);
+
+                if (i === correctLane) {
+                    score++;
+                    combo++;
+                    updateComboBar();
+                    // 10コンボで❤1回復（ただし最大3つまで）
+                    if (combo % 10 === 0 && lives < 3) {
+                        lives++;
+                        updateHearts();
+                        updateLivesDisplay();
+
+                        // 🔥 ゲージが光る演出
+                        const bar = document.getElementById("combo-bar");
+                        bar.classList.add("combo-flash");
+                        setTimeout(() => bar.classList.remove("combo-flash"), 500);
+                    }
+
+                    if (score % 2 === 0){
+                        speed += (score <= 6) ? 0.45 : (score <= 14) ? 0.38 : (score < 30) ? 0.15 : 0.10;
+                        bgm.playbackRate += 0.025;
+                    }
+
+                    if (score % 10 === 0) {
+                        backgroundIndex = (backgroundIndex + 1) % backgrounds.length;
+                        game.style.opacity = 0;
+                        
+                        // 画像変更を確実に行うために2フレーム待つ
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                game.style.backgroundImage = `url('${backgrounds[backgroundIndex]}')`;
+                                game.style.opacity = 1;
+                            });
+                        });
+                    }
+                    seCorrect.currentTime = 0;
+                    seCorrect.volume = 0.5;
+                    seCorrect.play();
+                }
+                else {
+                    combo = 0;
+                    updateComboBar();
+
+                    lives--;
+                    updateLivesDisplay();
+                    updateHearts();
+                    seWrong.currentTime = 0;
+                    seWrong.volume = 0.5;
+                    seWrong.play();
+
+                    flashPlayerRed();
+
+                    if (lives <= -1) {
+                        fadeOutBGM();
+                        if (isAdultMode){
+                            const normalRankings = updateRanking(distance, false);
+                            showRanking(normalRankings);
+                        }
+                        else{
+                            const Adultrankings = updateRanking(distance, true);
+                            showRanking(Adultrankings);
+                        }
+                        return;
+                    }
+                }
+                setTimeout(() => {
+                    isSpawning = false;
+                    spawnChallenge();
+                }, 4 * 1000 / speed); // ここをしっかり修正！！
+            }
+        }, 20);
+    });
+}
+
+// ▼ ダメージモーション1
+function flashPlayerRed(times = 3, interval = 100) {
+    let count = 0;
+    const flash = () => {
+        player.style.filter = count % 2 === 0 ? "brightness(0.4)" : "none";
+        count++;
+        if (count < times * 2) {
+            setTimeout(flash, interval);
+        } else {
+            player.style.filter = "none";
+        }
+    };
+    flash();
+}
+
+// ▼ ダメージモーション2
+function updateLivesDisplay() {
+    livesDisplay.innerHTML = `${"❤️".repeat(Math.max(0, lives))}`;
+}
+
+// ▼ ランキング保存
+function updateRanking(distance, isAdultMode = false) { // isAdultMode 引数を追加
+    const key = isAdultMode ? "adultRankings" : "normalRankings"; // モードによってキーを切り替え
+    
+    // localStorage からデータを取得し、JSON形式からJavaScriptの配列に変換。
+    // データがない場合は空の配列を初期値とする。
+    const data = JSON.parse(localStorage.getItem(key)) || [];
+    
+    // 現在のスコア（距離）を整数に変換して配列に追加
+    data.push(Math.floor(distance));
+    
+    // スコアを降順（高い順）にソート
+    data.sort((a, b) => b - a);
+    
+    // 上位1000件（または指定件数）に絞り込み
+    // 通常はランキング表示件数に合わせて10件程度にするのが一般的です。
+    const topData = data.slice(0, 1000); 
+    
+    // 更新したランキングデータを localStorage に保存
+    localStorage.setItem(key, JSON.stringify(topData));
+    
+    // 更新されたランキングデータを返す
+    return topData;
+}
+
+function updateHearts() {
+    const heart = "❤️";
+    livesDisplay.textContent = heart.repeat(Math.max(0, lives));
+}
+
+function showRanking(rankings) {
+    const modal = document.getElementById("ranking-modal");
+    const finalScore = document.getElementById("final-score");
+    const rankingList = document.getElementById("ranking-list");
+
+    // スコア（整数）を取得
+    const myScore = Math.floor(distance);
+
+    // 自分のスコアの順位を計算（インデックス＋1）
+    const myRank = rankings.indexOf(myScore) + 1;
+
+    // スコアと順位を表示
+    finalScore.textContent = `あなたのスコア: ${myScore}（${myRank}位）`;
+
+    // ランキングリスト生成
+    rankingList.innerHTML = "";
+    const medals = ["🥇", "🥈", "🥉"];
+
+    rankings.slice(0, 5).forEach((d, i) => {
+        const li = document.createElement("li");
+        if (i < medals.length) {
+            li.textContent = `${medals[i]} ${d}`;
+        } else  {
+            li.textContent = `${i + 1}位: ${d}`;
+        }
+        rankingList.appendChild(li);
+    });
+
+    modal.style.display = "block";
+}
+
+function restartGame() {
+    // スコア・ライフ・スピードをリセット
+    score = 0;
+    distance = 0;
+    speed = 2;
+    lives = 3;
+    combo = 0;
+    if (typeof updateHearts === "function") updateHearts();
+    updateLivesDisplay();
+    // プレイヤー初期位置に戻す
+    currentLane = 1;
+    player.style.top = lanes[currentLane] + "px";
+
+    // モーダル閉じる
+    document.getElementById("ranking-modal").style.display = "none";
+
+    // ゲーム画面はそのまま見せる
+    game.style.display = "block";
+
+    // 背景やBGMをリセット（必要なら）
+    bgPos = 0;
+    backgroundIndex = 0;
+    game.style.backgroundImage = `url('${backgrounds[backgroundIndex]}')`;
+    bgm.currentTime = 0;
+    bgm.playbackRate = 1;
+    bgm.volume = 0.1;
+    bgm.play().catch(e => console.log("BGM再生失敗", e));
+
+    started = true; // 最初のキー押しなしでBGM鳴らす
+
+    isSpawning = false;
+    spawnChallenge(); // 新しい問題スタート！
+}
+
+function returnToTitle() {
+    // ゲーム画面とモーダルを隠す
+    document.getElementById("game").style.display = "none";
+    document.getElementById("ranking-modal").style.display = "none";
+    
+    // タイトル画面を表示
+    document.getElementById("title-screen").style.display = "flex";
+
+    // スコア・ライフ・スピードをリセット
+    score = 0;
+    distance = 0;
+    speed = 2;
+    lives = 3;
+    combo = 0;
+    updateHearts();
+    updateLivesDisplay();
+
+    // プレイヤー初期位置に戻す
+    currentLane = 1;
+    player.style.top = lanes[currentLane] + "px";
+
+    // BGM止まってたら再生できるように
+    bgPos = 0;
+    backgroundIndex = 0;
+    game.style.backgroundImage = `url('${backgrounds[backgroundIndex]}')`;
+    bgm.pause();
+    bgm.currentTime = 0;
+    bgm.playbackRate = 1;
+    started = false;
+
+    // 🛠️ここ追加！
+    isSpawning = false;
+}
+
+let combo = 0;
+function updateComboBar() {
+    const bar = document.getElementById("combo-bar");
+    const percentage = Math.min((combo % 10) * 10, 100); // 10コンボで100%
+    bar.style.width = `${percentage}%`;
+}
+
+// ▼ BGMのフェードアウト処理
+function fadeOutBGM() {
+    let volume = bgm.volume;
+    const fade = setInterval(() => {
+        if (volume > 0.01) {
+            volume -= 0.01;
+            bgm.volume = volume;
+        } else {
+            clearInterval(fade);
+            bgm.pause();
+            bgm.currentTime = 0;
+        }
+    }, 50);
+}
+
+</script>
+</body>
+</html>
