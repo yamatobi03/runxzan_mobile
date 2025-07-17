@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>突撃！バードストライク</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background-color: #f0f8ff; }
+        .screen { display: none; padding: 20px; }
+        .question-box { font-size: 24px; margin-bottom: 20px; }
+        .option-button { font-size: 20px; margin: 10px; padding: 10px 20px; }
+        .mode-button { font-size: 18px; margin: 10px; padding: 10px 20px; }
+        #ranking-list { list-style: none; padding: 0; }
+    </style>
+</head>
+<body>
+
+<div id="start-screen" class="screen" style="display:block;">
+    <h1>突撃！バードストライク</h1>
+    <p>モードを選択してください</p>
+    <button class="mode-button" data-mode="easy">初級</button>
+    <button class="mode-button" data-mode="normal">中級</button>
+    <button class="mode-button" data-mode="hard">上級</button>
+</div>
+
+<div id="game-screen" class="screen">
+    <div class="question-box" id="question">問題がここに表示されます</div>
+    <div id="options"></div>
+    <div id="score">スコア: 0</div>
+</div>
+
+<div id="result-screen" class="screen">
+    <h2>結果発表！</h2>
+    <p id="final-score"></p>
+    <div id="ranking">
+        <h3>ランキング（上級モード）</h3>
+        <ol id="ranking-list"></ol>
+    </div>
+    <button onclick="location.reload()">タイトルに戻る</button>
+</div>
+
+<script>
+const gameState = {
+    mode: 'easy',
+    score: 0,
+    questionNumber: 0,
+    correctAnswer: null,
+    currentQuestion: ''
+};
+
+document.querySelectorAll('.mode-button').forEach(button => {
+    button.addEventListener('click', () => {
+        const mode = button.dataset.mode;
+        startGame(mode);
+    });
+});
+
+function startGame(selectedMode) {
+    gameState.mode = selectedMode;
+    gameState.score = 0;
+    gameState.questionNumber = 0;
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
+    nextQuestion();
+}
+
+function nextQuestion() {
+    if (gameState.questionNumber >= 30) {
+        showResult();
+        return;
+    }
+
+    const { question, correctAnswer } = generateQuestion(gameState.mode);
+    gameState.currentQuestion = question;
+    gameState.correctAnswer = correctAnswer;
+
+    document.getElementById('question').textContent = `Q${gameState.questionNumber + 1}: ${question}`;
+    setOptions(correctAnswer);
+}
+
+function generateQuestion(mode) {
+    let num1, num2, operator, correctAnswer;
+
+    if (mode === 'easy') {
+        const operators = ['+', '-'];
+        operator = operators[Math.floor(Math.random() * operators.length)];
+        num1 = Math.floor(Math.random() * 10);
+        num2 = Math.floor(Math.random() * 10);
+        if (operator === '-' && num2 > num1) [num1, num2] = [num2, num1];
+    } else if (mode === 'normal') {
+        const operators = ['+', '-', '*'];
+        operator = operators[Math.floor(Math.random() * operators.length)];
+        num1 = Math.floor(Math.random() * 10);
+        num2 = Math.floor(Math.random() * 10);
+    } else if (mode === 'hard') {
+        const operators = ['+', '-', '*', '/'];
+        operator = operators[Math.floor(Math.random() * operators.length)];
+        if (operator === '/') {
+            num2 = Math.floor(Math.random() * 9) + 1;
+            let result = Math.floor(Math.random() * 9) + 1;
+            num1 = num2 * result;
+        } else {
+            num1 = Math.floor(Math.random() * 20);
+            num2 = Math.floor(Math.random() * 20);
+        }
+    }
+
+    correctAnswer = eval(`${num1} ${operator} ${num2}`);
+    return { question: `${num1} ${operator} ${num2}`, correctAnswer };
+}
+
+function setOptions(correctAnswer) {
+    const optionsDiv = document.getElementById('options');
+    optionsDiv.innerHTML = '';
+
+    const correctIndex = Math.floor(Math.random() * 4);
+    for (let i = 0; i < 4; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'option-button';
+        if (i === correctIndex) {
+            btn.textContent = correctAnswer;
+            btn.onclick = () => handleAnswer(true);
+        } else {
+            let wrong;
+            do {
+                wrong = correctAnswer + Math.floor(Math.random() * 10) - 5;
+            } while (wrong === correctAnswer);
+            btn.textContent = wrong;
+            btn.onclick = () => handleAnswer(false);
+        }
+        optionsDiv.appendChild(btn);
+    }
+}
+
+function handleAnswer(isCorrect) {
+    if (isCorrect) {
+        gameState.score++;
+        document.getElementById('score').textContent = `スコア: ${gameState.score}`;
+    }
+    gameState.questionNumber++;
+    nextQuestion();
+}
+
+function showResult() {
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('final-score').textContent = `Score: ${gameState.score}`;
+
+    if (gameState.mode === 'hard') {
+        updateAndShowRanking(gameState.score);
+    } else {
+        document.getElementById('ranking').style.display = 'none';
+    }
+}
+
+function updateAndShowRanking(score) {
+    const key = 'hardModeRanking';
+    const ranking = JSON.parse(localStorage.getItem(key)) || [];
+    ranking.push(score);
+    ranking.sort((a, b) => b - a);
+    const top5 = ranking.slice(0, 5);
+    localStorage.setItem(key, JSON.stringify(top5));
+
+    const list = document.getElementById('ranking-list');
+    list.innerHTML = '';
+    top5.forEach((s, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}位: ${s}点`;
+        list.appendChild(li);
+    });
+}
+</script>
+</body>
+</html>
