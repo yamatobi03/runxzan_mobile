@@ -519,7 +519,7 @@ function spawnChallenge() {
                 setTimeout(() => {
                     isSpawning = false;
                     spawnChallenge();
-                }, 4 * 1000 / speed); 
+                }, 4 * 1000 / baseGameSpeed); 
             }
         }, 20); // 障害物の移動間隔
     });
