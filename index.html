@@ -6,9 +6,21 @@
   <meta name="description" content="計算で加速！走り続ける脳トレアクションゲーム - 計算疾走！RUN×算">
   <title>計算疾走！RUN×算</title>
   <link rel="stylesheet" href="style.css">
-</head>
-<style>
-    body { font-family: sans-serif; background: #eef; text-align: center; margin: 0; overflow: hidden; }
+</head><style>
+    body { 
+        font-family: sans-serif; 
+        background: #eef; 
+        text-align: center; 
+        margin: 0; 
+        /* ゲーム全体が画面中央に配置されるように調整 */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh; /* 画面全体の高さに合わせる */
+        overflow: hidden; /* スクロールを完全に防ぐ */
+    }
+
     /* タイトル画面 */
     #title-screen {
         display: flex;
@@ -16,24 +28,32 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
+        width: 100vw; /* 画面全体に広げる */
         background-color: #e0f7fa;
+        position: fixed; /* 常に画面全体を覆う */
+        top: 0;
+        left: 0;
+        z-index: 2000; /* 最前面に表示 */
     }
     #title-screen h1 {
-        font-size: 50px;
+        font-size: 6vw; /* 画面幅に合わせて調整 */
         color: #333;
     }
-    #start-button {
-        margin-top: 20px;
-        padding: 15px 30px;
-        font-size: 20px;
+    #start-button, #adult-mode-button {
+        margin-top: 2.5vh; /* 画面高さに合わせて調整 */
+        padding: 2vh 4vw; /* 画面サイズに合わせて調整 */
+        font-size: 2.5vw; /* 画面幅に合わせて調整 */
         background-color: #4CAF50;
         color: white;
         border: none;
-        border-radius: 10px;
+        border-radius: 1vw;
         cursor: pointer;
         transition: background-color 0.3s;
     }
-    #start-button:hover {
+    #adult-mode-button {
+        background-color: #f44336;
+    }
+    #start-button:hover, #adult-mode-button:hover {
         background-color: #45a049;
     }
     #ranking-list {
@@ -45,133 +65,195 @@
         list-style: none;
     }
     #ranking-list li {
-        margin: 6px 0;
-        font-size: 16px;
+        margin: 0.8vh 0; /* 画面高さに合わせて調整 */
+        font-size: 2vw; /* 画面幅に合わせて調整 */
         font-weight: bold;
         color: #333;
     }
     #ranking-modal button {
-        margin-top: 20px;
-        padding: 10px 20px;
-        font-size: 18px;
+        margin-top: 2.5vh; /* 画面高さに合わせて調整 */
+        padding: 1.5vh 3vw; /* 画面サイズに合わせて調整 */
+        font-size: 2.2vw; /* 画面幅に合わせて調整 */
         background: #4CAF50;
         color: white;
         border: none;
-        border-radius: 10px;
+        border-radius: 1vw;
         cursor: pointer;
         transition: background-color 0.3s;
     }
     #ranking-modal button:hover {
         background: #45a049;
     }
+
+    /* ★ゲーム本体の画面調整★ */
     #game {
-    position: relative;
-    aspect-ratio: 8 / 3; /* ← 800:300 の比率 */
-    width: 800px;    
-    background: url('上空.jpg') repeat-x center center;
-    background-size: cover;
-    border: 2px solid #000;
-    margin: 20px auto;
-    overflow: hidden;
-    background-position: 0 0;
+        position: relative;
+        /* 元の比率 800:300 を維持 */
+        aspect-ratio: 8 / 3; 
+        /* 画面幅の90%を使用し、最大の幅を800pxに制限 */
+        width: 90vw; 
+        max-width: 800px; /* PCなどでの上限 */
+        
+        background: url('上空.jpg') repeat-x center center;
+        background-size: cover;
+        border: 0.25vw solid #000; /* borderもvwで */
+        margin: 20px auto; /* 中央寄せ */
+        overflow: hidden;
+        background-position: 0 0;
+        
+        /* ゲームが非表示の時は見えないように */
+        display: none; 
     }
 
     #game.fade {
         transition: opacity 0.3s ease;
         opacity: 0;
     }
+    
+    /* UI要素の調整 */
+    h1 { /* 「↑↑でレーン移動！ →で加速」のh1 */
+        font-size: 3vw; 
+        margin-top: 1vh;
+        margin-bottom: 1vh;
+    }
+    #question {
+        font-size: 3vw; 
+        margin-top: 1vh;
+        margin-bottom: 1vh;
+    }
+    #target {
+        font-size: 4.5vw; 
+        color: #d32f2f;
+        font-weight: bold;
+        padding: 0 1vw;
+        border-radius: 0.5vw;
+    }
+    #distance {
+        font-size: 2.5vw; 
+        margin-top: 0.5vh;
+        margin-bottom: 0.5vh;
+    }
     #lives {
-        height: 40px; /* 表示中のハートの高さくらいに合わせる */
-        font-size: 24px;
-        line-height: 40px;
+        height: 5vh; /* 表示中のハートの高さくらいに合わせる */
+        font-size: 3.5vw;
+        line-height: 5vh;
+        margin-top: 0.5vh;
+        margin-bottom: 0.5vh;
     }
+    
     .lane {
-        position: absolute; width: 100%; height: 100px; border-top: 1px solid #ccc;
+        position: absolute; 
+        width: 100%; 
+        height: 33.33%; /* #gameの高さの1/3 */
+        border-top: 0.1vw solid #ccc; /* borderもvwで */
     }
+    /* レーンの配置を微調整 */
+    .lane:nth-child(1) { top: 0; }
+    .lane:nth-child(2) { top: 33.33%; }
+    .lane:nth-child(3) { top: 66.66%; }
+
+
+    /* ★プレイヤーの調整★ */
     #player {
         position: absolute; 
-        left: 50px; 
-        width: 50px; 
-        height: 50px;
+        /* 50px / 800px = 6.25% → 6.25vw (ゲーム画面の幅の6.25%) */
+        left: 6.25%; 
+        /* 50px / 300px = 16.66...% → 16.67% (ゲーム画面の高さの16.67%) */
+        width: 6.25%; 
+        height: 16.67%; 
         background: url('type_zero_anf.gif') no-repeat center center;
-        background-size: 90%; /* GIF画像がプレイヤーサイズにフィットするように */
+        background-size: 90%; 
         transition: top 0.1s;
     }
+
+    /* ★障害物の調整★ */
     .obstacle {
         position: absolute;
-        width: 100px;
-        height: 50px;
-        background: rgba(173, 216, 230, 0.85); /* 半透明の水色 */
-        font-size: 22px;                       /* 少し大きく */
+        /* 100px / 800px = 12.5% → 12.5% (ゲーム画面の幅の12.5%) */
+        width: 12.5%; 
+        /* 50px / 300px = 16.66...% → 16.67% (ゲーム画面の高さの16.67%) */
+        height: 16.67%; 
+        background: rgba(173, 216, 230, 0.85); 
+        /* フォントサイズも画面幅に合わせて調整 */
+        font-size: 2.75vw; /* 元の22pxをvwに変換 (22/800 * 100vw = 2.75vw) */
         text-align: center;
-        line-height: 50px;
+        line-height: 100%; /* 親要素(obstacle)の高さに対して中央 */
         font-weight: bold;
         font-family: "Consolas", "Courier New", monospace;
         transform: translateZ(0);
         will-change: transform;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
-
-        /* 境界をはっきりさせる */
-        border: 2px solid #007acc;
-        border-radius: 8px;
-
-        /* 影をつけて視認性UP */
-        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
-
-        /* 文字にも影を追加して明瞭に */
+        border: 0.25vw solid #007acc; /* borderもvwに */
+        border-radius: 1vw; /* border-radiusもvwに */
+        box-shadow: 0.25vw 0.25vw 0.75vw rgba(0, 0, 0, 0.3); /* 影もvwに */
         color: #fff;
-        text-shadow: 1px 1px 2px #000;
-    }
-    #target {
-    font-size: 36px;
-    color: #d32f2f; /* 赤系で目立つ */
-    font-weight: bold;
-    padding: 0 10px;
-    border-radius: 5px;
-    }
-    #question {
-        font-size: 24px; margin-top: 10px;
-    }
-    .game {
-        transition: opacity 1.5s ease-out, background-image 1.5s ease-out;
-        will-change: opacity, background-image;
+        text-shadow: 0.125vw 0.125vw 0.25vw #000; /* 文字影もvwに */
     }
 
-    /* 必要に応じてフェード用の追加クラス（現在の実装を活かす場合） */
-    .fade {
-        opacity: 0.7;
-        transition: opacity 0.3s ease-in-out;
-    }
-    #score {
-        font-size: 18px;
-    }
-    /* コンボゲージ全体 */
+    /* コンボゲージ */
     #combo-bar-container {
-        width: 300px;
-        height: 25px;
+        width: 37.5vw; /* 300px / 800px = 37.5% → 37.5vw */
+        max-width: 300px; /* 最大幅も設定 */
+        height: 3.125vh; /* 25px / 300px (高さ) = 8.33% → 約3.125vh (25 / 800 * 100 = 3.125) */
         background-color: #ccc;
-        border-radius: 15px;
-        margin: 10px auto;
+        border-radius: 1.5vw;
+        margin: 1.5vh auto;
         overflow: hidden;
-        border: 2px solid #333;
+        border: 0.25vw solid #333;
     }
 
-    /* 実際に伸びるゲージ */
     #combo-bar {
         height: 100%;
         width: 0%;
         background: linear-gradient(90deg, #4CAF50, #8BC34A);
         transition: width 0.2s ease;
     }
-    @keyframes flashCombo {
-    0%, 100% { background-color: #4CAF50; }
-    50% { background-color: gold; }
+    
+    /* ランキングモーダル */
+    #ranking-modal {
+        display:none; 
+        position:fixed; 
+        top:50%; 
+        left:50%; 
+        transform:translate(-50%,-50%);
+        background:white; 
+        padding: 4vh 4vw; /* 画面サイズに合わせて調整 */
+        border:0.25vw solid #000; 
+        border-radius:2vw; 
+        z-index:1000;
+        width: 70vw; /* モーダルの幅も調整 */
+        max-width: 400px;
     }
-    .combo-flash {
-        animation: flashCombo 0.5s ease;
+    #ranking-modal h2 {
+        font-size: 4vw; /* 画面幅に合わせて調整 */
+        margin-bottom: 2vh;
+    }
+    #ranking-modal p, #ranking-modal h3 {
+        font-size: 2.5vw; /* 画面幅に合わせて調整 */
+        margin-bottom: 1vh;
+    }
+    #ranking-modal ol {
+        font-size: 2vw; /* 画面幅に合わせて調整 */
     }
 
+    /* スキン選択 */
+    #skin-select p {
+        font-size: 2.5vw;
+    }
+    #skin-select div {
+        gap: 1vw; /* 隙間もvwで */
+    }
+    .skin-option {
+        width: 6vw; /* 5vwから少し調整 */
+        height: 6vw;
+        cursor:pointer; 
+        border:0.25vw solid transparent; /* borderもvwに */
+        border-radius:1vw; /* border-radiusもvwに */
+    }
+    .skin-option:hover {
+        border-color: #4CAF50; /* ホバー時の色 */
+    }
 </style>
 <body>
 
@@ -240,7 +322,7 @@ const bgm = document.getElementById("bgm");
 const seCorrect = document.getElementById("se-correct");
 const seWrong = document.getElementById("se-wrong");
 
-const lanes = [25, 125, 225]; // Y座標
+const lanes = [0, 0, 0]; // Y座標
 const backgrounds = [
     "上空.jpg", "夕方.jpg", "夜.jpg"
 ];
@@ -299,8 +381,29 @@ let touchStartY = 0; // タッチ開始時のY座標を保存
 let touchStartX = 0; // タッチ開始時のX座標を保存
 const SWIPE_THRESHOLD = 50; // スワイプと認識するための最低ピクセル距離
 
+// ゲームの初期化時に一度だけ呼ばれる関数
+function initializeGameLayout() {
+    updateLanePositions(); // レーンの位置を初期化
+    player.style.backgroundImage = `url('${selectedSkin}')`; // プレイヤーのスキンを初期設定
+}
+
 // ゲーム画面の要素を取得
 const gameArea = document.getElementById("game");
+
+// レーンの位置を動的に計算する関数
+function updateLanePositions() {
+    const gameHeight = gameArea.offsetHeight; // #game要素の現在の高さを取得
+
+    // 元の25px, 125px, 225px は高さ300pxのゲーム画面での値
+    // 例えば、上から25pxは 25/300 = 約8.33%
+    // これを現在のゲーム画面の高さに適用する
+    lanes[0] = gameHeight * (25 / 300); // 最上レーンのY座標
+    lanes[1] = gameHeight * (125 / 300); // 中央レーンのY座標
+    lanes[2] = gameHeight * (225 / 300); // 最下レーンのY座標
+
+    // プレイヤーの現在のレーン位置を更新
+    player.style.top = lanes[currentLane] + "px"; 
+}
 
 // gameAreaが存在する場合のみイベントリスナーを設定
 if (gameArea) {
@@ -370,19 +473,26 @@ if (gameArea) {
 // ▼ ゲーム開始ボタン
 document.getElementById("start-button").addEventListener("click", function() {
     document.getElementById("title-screen").style.display = "none";
-    game.style.display = "block";
-    player.style.backgroundImage = `url('${selectedSkin}')`; // ←これ追加！
+    game.style.display = "block"; // ゲーム画面を表示
+    
+    // ゲーム開始時にもレーン位置を更新
+    updateLanePositions(); 
+    player.style.backgroundImage = `url('${selectedSkin}')`; 
     distance = 0;
     isAdultMode = false;
     spawnChallenge();
 });
+
 document.getElementById('adult-mode-button').addEventListener('click', () => {
     document.getElementById("title-screen").style.display = "none";
-    game.style.display = "block";
-    player.style.backgroundImage = `url('${selectedSkin}')`; // ←これ追加！
+    game.style.display = "block"; // ゲーム画面を表示
+
+    // ゲーム開始時にもレーン位置を更新
+    updateLanePositions();
+    player.style.backgroundImage = `url('${selectedSkin}')`; 
     distance = 0;
     isAdultMode = true;
-    spawnChallenge(); // startGame関数を呼び出す
+    spawnChallenge();
 });
 
 // ▼ 式をランダム生成
@@ -453,16 +563,31 @@ function spawnChallenge() {
         const obstacle = document.createElement("div");
         obstacle.className = "obstacle";
         obstacle.textContent = expr.replace('*', 'ｘ').replace('/', '／').replace('+', '＋').replace('-', 'ー');
-        obstacle.style.top = lanes[i] + "px";
-        obstacle.style.left = "800px";
+        
+        // obstacle.style.top は lanes[i] で設定されているので変更なし
+        obstacle.style.top = lanes[i] + "px"; 
+        
+        // ★変更点★ 障害物の初期位置（右端）をゲーム画面の幅に合わせる
+        obstacle.style.left = game.offsetWidth + "px"; 
         game.appendChild(obstacle);
 
-        let pos = 800;
+        let pos = game.offsetWidth; // 初期位置も現在のゲーム画面の幅から開始
         const move = setInterval(() => {
-            pos -= speed; // ここで current speed (baseGameSpeed またはその2倍) が使われる
+            pos -= speed; 
             obstacle.style.left = pos + "px";
 
-            if (pos < 100 && pos + 100 > 50 && i === currentLane) {
+            // ★変更点★ 衝突判定の基準値も現在のゲーム画面のサイズに合わせて調整
+            // プレイヤーのleft: 6.25% (game.offsetWidth * 0.0625)
+            // プレイヤーのwidth: 6.25% (game.offsetWidth * 0.0625)
+            // 障害物のwidth: 12.5% (game.offsetWidth * 0.125)
+            const playerVisualLeft = game.offsetWidth * 0.0625; // プレイヤーの表示上の左端
+            const playerVisualWidth = game.offsetWidth * 0.0625; // プレイヤーの表示上の幅
+            const obstacleVisualWidth = game.offsetWidth * 0.125; // 障害物の表示上の幅
+
+
+            if (pos < (playerVisualLeft + playerVisualWidth * 0.8) && // プレイヤーの少し手前で判定
+                (pos + obstacleVisualWidth * 0.8) > playerVisualLeft && // 障害物の少し手前で判定
+                i === currentLane) {
                 if (hasAnswered) return;
 
                 hasAnswered = true;
@@ -544,15 +669,37 @@ function spawnChallenge() {
                         return;
                     }
                 }
+            // 障害物が画面外に出たかどうかの判定も、障害物の幅を考慮して調整
+            if (pos < -obstacleVisualWidth) { 
+                clearInterval(move);
+                if (obstacle.parentNode === game) { 
+                    game.removeChild(obstacle);
+                }
                 // 問題が出現するまでの間隔も current speed に応じて変化
                 setTimeout(() => {
                     isSpawning = false;
                     spawnChallenge();
                 }, 4 * 1000 / baseGameSpeed); 
             }
+        }
         }, 20); // 障害物の移動間隔
     });
 }
+
+// ウィンドウのリサイズイベントリスナー
+window.addEventListener('resize', () => {
+    updateLanePositions(); // 画面サイズ変更時にレーン位置を再計算
+    // スキン選択ボタンの幅/高さも再計算されるので、選択中の枠線を再適用
+    selectSkin(selectedSkin); // 現在選択中のスキンに再度枠線を適用
+});
+
+
+// 初期ロード時にスキン選択の枠線を設定し、レーン位置を初期化
+document.addEventListener('DOMContentLoaded', () => {
+    selectSkin(selectedSkin); // デフォルトスキンに枠線を適用
+    // initialGameLayout(); // ゲーム画面の初期表示準備はスタートボタンクリック時に行う
+});
+
 
 // ▼ ダメージモーション1
 function flashPlayerRed(times = 3, interval = 100) {
