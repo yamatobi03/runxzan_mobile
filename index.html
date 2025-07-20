@@ -184,15 +184,17 @@
         <div id="skin-select" style="margin-top: 20px;">
             <p style="font-size: 20px;">スキンを選ぼう！</p>
             <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <img src="type_zero_anf.gif" class="skin-option" onclick="selectSkin('type_zero_anf.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
-                <img src="fighter_3body_an.gif" class="skin-option" onclick="selectSkin('fighter_3body_an.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
-                <img src="fighter_f104_an.gif" class="skin-option" onclick="selectSkin('fighter_f104_an.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
-                <img src="bird18.gif" class="skin-option" onclick="selectSkin('bird18.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
-                <img src="karasu.gif" class="skin-option" onclick="selectSkin('karasu.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
-                <!-- <img src="chiken.gif" class="skin-option" onclick="selectSkin('chiken.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
-                <img src="dog.gif" class="skin-option" onclick="selectSkin('dog.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;"> -->
-                <img src="angel.gif" class="skin-option" onclick="selectSkin('angel.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
-                <img src="ufo.gif" class="skin-option" onclick="selectSkin('ufo.gif')" style="width:80px; height:80px; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="type_zero_anf.gif" class="skin-option" onclick="selectSkin('type_zero_anf.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="fighter_3body_an.gif" class="skin-option" onclick="selectSkin('fighter_3body_an.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="fighter_f104_an.gif" class="skin-option" onclick="selectSkin('fighter_f104_an.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="type_zero21_anf.gif" class="skin-option" onclick="selectSkin('type_zero21_anf.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="helicopter_2.gif" class="skin-option" onclick="selectSkin('helicopter_2.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="bird18.gif" class="skin-option" onclick="selectSkin('bird18.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="karasu.gif" class="skin-option" onclick="selectSkin('karasu.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="chiken.gif" class="skin-option" onclick="selectSkin('chiken.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="dog.gif" class="skin-option" onclick="selectSkin('dog.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="angel.gif" class="skin-option" onclick="selectSkin('angel.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
+                <img src="ufo.gif" class="skin-option" onclick="selectSkin('ufo.gif')" style="width:5vw; height:5vw; cursor:pointer; border:2px solid transparent; border-radius:10px;">
             </div>
         </div>
     </div>
@@ -505,11 +507,11 @@ function spawnChallenge() {
                     if (lives <= -1) {
                         fadeOutBGM();
                         if (isAdultMode){
-                            const normalRankings = updateRanking(distance, false);
+                            const normalRankings = updateRanking(distance, false, selectedSkin);
                             showRanking(normalRankings);
                         }
                         else{
-                            const Adultrankings = updateRanking(distance, true);
+                            const Adultrankings = updateRanking(distance, true, selectedSkin);
                             showRanking(Adultrankings);
                         }
                         return;
@@ -546,29 +548,22 @@ function updateLivesDisplay() {
 }
 
 // ▼ ランキング保存
-function updateRanking(distance, isAdultMode = false) { // isAdultMode 引数を追加
-    const key = isAdultMode ? "adultRankings" : "normalRankings"; // モードによってキーを切り替え
-    
-    // localStorage からデータを取得し、JSON形式からJavaScriptの配列に変換。
-    // データがない場合は空の配列を初期値とする。
+function updateRanking(distance, isAdultMode = false, skin = "default") {
+    const key = isAdultMode ? "adultRankings" : "normalRankings";
     const data = JSON.parse(localStorage.getItem(key)) || [];
-    
-    // 現在のスコア（距離）を整数に変換して配列に追加
-    data.push(Math.floor(distance));
-    
-    // スコアを降順（高い順）にソート
-    data.sort((a, b) => b - a);
-    
-    // 上位1000件（または指定件数）に絞り込み
-    // 通常はランキング表示件数に合わせて10件程度にするのが一般的です。
-    const topData = data.slice(0, 1000); 
-    
-    // 更新したランキングデータを localStorage に保存
+
+    // 距離とスキンのオブジェクト形式で保存
+    data.push({ score: Math.floor(distance), skin: skin });
+
+    // スコア順に並び替え
+    data.sort((a, b) => b.score - a.score);
+
+    const topData = data.slice(0, 1000);
     localStorage.setItem(key, JSON.stringify(topData));
-    
-    // 更新されたランキングデータを返す
+
     return topData;
 }
+
 
 function updateHearts() {
     const heart = "❤️";
@@ -580,31 +575,42 @@ function showRanking(rankings) {
     const finalScore = document.getElementById("final-score");
     const rankingList = document.getElementById("ranking-list");
 
-    // スコア（整数）を取得
     const myScore = Math.floor(distance);
-
-    // 自分のスコアの順位を計算（インデックス＋1）
-    const myRank = rankings.indexOf(myScore) + 1;
-
-    // スコアと順位を表示
+    const myRank = rankings.findIndex(entry => entry.score === myScore) + 1;
     finalScore.textContent = `あなたのスコア: ${myScore}（${myRank}位）`;
 
-    // ランキングリスト生成
     rankingList.innerHTML = "";
     const medals = ["🥇", "🥈", "🥉"];
 
-    rankings.slice(0, 5).forEach((d, i) => {
+    rankings.slice(0, 7).forEach((entry, i) => {
         const li = document.createElement("li");
+
+        // テキスト
+        const text = document.createElement("span");
         if (i < medals.length) {
-            li.textContent = `${medals[i]} ${d}`;
-        } else  {
-            li.textContent = `${i + 1}位: ${d}`;
+            text.textContent = `${medals[i]} ${entry.score}`;
+        } else {
+            text.textContent = `${i + 1}位: ${entry.score}`;
         }
+
+        // スキン画像
+        const img = document.createElement("img");
+        img.src = entry.skin || "default.gif"; // 念のため fallback も
+        img.alt = "skin";
+        img.width = 32;
+        img.height = 32;
+        img.style.verticalAlign = "middle";
+        img.style.marginLeft = "8px";
+        img.style.borderRadius = "5px";
+
+        li.appendChild(text);
+        li.appendChild(img);
         rankingList.appendChild(li);
     });
 
     modal.style.display = "block";
 }
+
 
 function restartGame() {
     // スコア・ライフ・スピードをリセット
