@@ -445,7 +445,7 @@
                 touchStartX = e.touches[0].clientX;
 
                 if (!started) {
-                    bgm.volume = 0.05;
+                    bgm.volume = 0.02;
                     bgm.play().catch(error => console.log("BGM再生失敗", error));
                     started = true;
                     bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE;
@@ -556,7 +556,7 @@
             
             // Only play BGM if not already started by touch (for first touch case)
             if (!started) {
-                bgm.volume = 0.05;
+                bgm.volume = 0.02;
                 bgm.play().catch(error => console.log("BGM再生失敗", error));
                 started = true;
             }
@@ -910,7 +910,7 @@
                     clearInterval(fade);
                     bgm.pause();
                     bgm.currentTime = 0; // Reset BGM time after fade
-                    bgm.volume = 0.05; // Reset volume for next play
+                    bgm.volume = 0.02; // Reset volume for next play
                 }
             }, 50);
         }
