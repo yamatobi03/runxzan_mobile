@@ -184,6 +184,14 @@
         display: none; /* Hidden by default, shown on game start */
     }
 
+    #ui-container {
+        position: absolute;
+        top: 1vh; /* 上から1vhの位置に固定（必要に応じて調整） */
+        width: 100%;
+        text-align: center;
+        z-index: 10;
+    }
+
     #game.fade {
         transition: opacity 0.3s ease;
         opacity: 0;
@@ -328,12 +336,13 @@
     <audio id="se-correct" src="決定ボタンを押す53.mp3"></audio>
     <audio id="se-wrong" src="ビープ音4.mp3"></audio>
 
-    <h1>↑↑でレーン移動！　→で加速</h1>
-    <div id="question">答えが <span id="target">?</span> になる式を選ぼう！</div>
-    <div id="distance">00000m</div>
-    <div id="lives">❤️❤️❤️</div>
-    <div id="combo-bar-container">
-        <div id="combo-bar"></div>
+    <div id="ui-container">
+        <h1>↑↑でレーン移動！　→で加速</h1>
+        <div id="question">答えが <span id="target">?</span> になる式を選ぼう！</div>
+        <div id="distance">00000m</div>
+        <div id="lives">❤️❤️❤️</div>
+        <div id="combo-bar-container">
+            <div id="combo-bar"></div>
     </div>
     <div id="game">
         <div id="player"></div>
