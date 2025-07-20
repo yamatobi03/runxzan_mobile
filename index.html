@@ -294,50 +294,39 @@ const INITIAL_BGM_PLAYBACK_RATE = 1.0;
 let currentBaseBGMPlaybackRate = INITIAL_BGM_PLAYBACK_RATE; // スコアに応じて永続的に変化するBGMの基準レート
 
 let isAccelerating = false; // 加速中かどうかのフラグ
+// --- スマホ用スワイプ操作 ---
+let touchStartY = 0;
+let touchEndY = 0;
 
-// ▼ 最初のキー押しでBGM再生＋プレイヤー移動
-document.addEventListener("keydown", (e) => {
+document.addEventListener("touchstart", (e) => {
     if (!started) {
         bgm.volume = 0.1;
         bgm.play().catch(error => console.log("BGM再生失敗", error));
         started = true;
-        bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE; // ゲーム開始時にBGMレートを設定
+        bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE;
     }
 
-    if (e.key === "ArrowUp" && currentLane > 0) {
-        currentLane--;
-    } else if (e.key === "ArrowDown" && currentLane < 2) {
-        currentLane++;
-    } 
-    else if (e.key === "ArrowRight" && !isAccelerating) {
-        // baseGameSpeed（現在の基準速度）を2倍にして speed に設定
-        speed = baseGameSpeed * 2; 
-        bgm.playbackRate = currentBaseBGMPlaybackRate * 2; // BGMも2倍速にする
+    touchStartY = e.changedTouches[0].clientY;
+}, { passive: true });
 
-        isAccelerating = true;
-        console.log("Speed doubled! Current speed:", speed);
-        console.log("BGM playback rate doubled! New rate:", bgm.playbackRate);
+document.addEventListener("touchend", (e) => {
+    touchEndY = e.changedTouches[0].clientY;
+    const deltaY = touchStartY - touchEndY;
+
+    // スワイプ判定のしきい値（例: 30px以上動かしたら反応）
+    const swipeThreshold = 30;
+
+    if (Math.abs(deltaY) > swipeThreshold) {
+        if (deltaY > 0 && currentLane > 0) {
+            // 上にスワイプ → 上のレーンへ
+            currentLane--;
+        } else if (deltaY < 0 && currentLane < 2) {
+            // 下にスワイプ → 下のレーンへ
+            currentLane++;
+        }
+        player.style.top = lanes[currentLane] + "px";
     }
-
-    player.style.top = lanes[currentLane] + "px";
-});
-
-
-// --- ★キーを離した時のイベントリスナーを追加★ ---
-document.addEventListener("keyup", (e) => {
-    if (e.key === "ArrowRight" && isAccelerating) {
-        // speed を baseGameSpeed（現在の基準速度）に戻す
-        speed = baseGameSpeed; 
-        // BGMも currentBaseBGMPlaybackRate（現在の基準レート）に戻す
-        bgm.playbackRate = currentBaseBGMPlaybackRate; 
-
-        isAccelerating = false;
-        console.log("Speed returned to normal! Current speed:", speed);
-        console.log("BGM playback rate returned to normal! Current rate:", bgm.playbackRate);
-
-        // 必要であれば、減速SEや視覚エフェクトをここで追加
-    }
-});
+}, { passive: true });
 
 
 // ▼ ゲーム開始ボタン
