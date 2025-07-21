@@ -1,648 +1,716 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="計算で加速！走り続ける脳トレアクションゲーム - 計算疾走！RUN×算">
-    <title>計算疾走！RUN×算</title>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="計算で加速！走り続ける脳トレアクションゲーム - 計算疾走！RUN×算">
+        <title>計算疾走！RUN×算</title>
     </head>
-<style>
-    /* ------------------------------------------------------------- */
-    /* 全体設定 */
-    /* ------------------------------------------------------------- */
-    body {
-        font-family: sans-serif;
-        background: #eef;
-        text-align: center;
-        margin: 0;
-        /* Game content should be centered vertically and horizontally */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        /*min-height: 100vh; /* Ensure body takes full viewport height */
-        height: 100vh;
-        height: 100dhv;
-        width: 100vw;
-        overflow: hidden; /* Prevent scrolling of the entire page */
-        position: fixed;
-        top: 0;
-        left: 0;
-    }
-
-    /* ------------------------------------------------------------- */
-    /* タイトル画面 (Title Screen) */
-    /* ------------------------------------------------------------- */
-    #title-screen {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        width: 100vw; /* Occupy full viewport width */
-        background-color: #e0f7fa;
-        position: fixed; /* Keep it fixed over the whole screen */
-        top: 0;
-        left: 0;
-        z-index: 2000; /* Ensure it's on top */
-    }
-    #title-screen h1 {
-        font-size: 4vw; /* 変更: 6vwから5vwに縮小 */
-        color: #333;
-    }
-    #start-button, #adult-mode-button {
-        margin-top: 2.4vh; 
-        padding: 1.8vh 3.0vw; 
-        font-size: 1.8vw; 
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 0.8vw; 
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    #adult-mode-button {
-        background-color: #f44336;
-    }
-    #start-button:hover, #adult-mode-button:hover {
-        background-color: #45a049;
-    }
-
-    /* Skin selection modal */
-    #skin-select {
-        margin-top: 2.2vh; /* 変更: 2.5vhから2.2vhに縮小 */
-    }
-    #skin-select p {
-        font-size: 2vw; /* 変更: 2.5vwから2.2vwに縮小 */
-    }
-    #skin-select div {
-        display: flex;
-        gap: 0.8vw; /* 変更: 1vwから0.8vwに縮小 */
-        margin-top: 0.8vh; /* 変更: 1vhから0.8vhに縮小 */
-    }
-    .skin-option {
-        width: 5vw; /* 変更: 6vwから5vwに縮小 */
-        height: 5vw; /* 変更: 6vwから5vwに縮小 */
-        cursor: pointer;
-        border: 0.2vw solid transparent; /* 変更: 0.25vwから0.2vwに縮小 */
-        border-radius: 0.8vw; /* 変更: 1vwから0.8vwに縮小 */
-    }
-    .skin-option:hover {
-        border-color: #4CAF50;
-    }
-
-
-    /* ------------------------------------------------------------- */
-    /* ランキングモーダル (Ranking Modal) */
-    /* ------------------------------------------------------------- */
-    #ranking-modal {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 3.5vh 3.5vw; /* 変更: 4vh 4vw から縮小 */
-        border: 0.2vw solid #000; /* 変更: 0.25vwから0.2vwに縮小 */
-        border-radius: 1.8vw; /* 変更: 2vwから1.8vwに縮小 */
-        z-index: 1000;
-        width: 65vw; /* 変更: 70vwから65vwに縮小 */
-        max-width: 380px; /* 変更: 400pxから380pxに縮小 */
-    }
-    #ranking-modal h2 {
-        font-size: 3vw; /* 変更: 4vwから3.5vwに縮小 */
-        margin-bottom: 1.8vh; /* 変更: 2vhから1.8vhに縮小 */
-    }
-    #ranking-modal p, #ranking-modal h3 {
-        font-size: 2vw; /* 変更: 2.5vwから2.2vwに縮小 */
-        margin-bottom: 0.8vh; /* 変更: 1vhから0.8vhに縮小 */
-    }
-    #ranking-list {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding-left: 0;
-        list-style: none;
-        margin-top: 0.8vh;
-        margin-bottom: 1.8vh;
-    }
-    #ranking-list li {
-        margin: 0.6vh 0; /* 変更: 0.8vhから0.6vhに縮小 */
-        font-size: 1.6vw; /* 変更: 2vwから1.8vwに縮小 */
-        font-weight: bold;
-        color: #333;
-    }
-    #ranking-modal button {
-        margin-top: 2.2vh; /* 変更: 2.5vhから2.2vhに縮小 */
-        padding: 1.3vh 2.8vw; /* 変更: 1.5vh 3vw から縮小 */
-        font-size: 1.8vw; /* 変更: 2.2vwから2vwに縮小 */
-        background: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 0.8vw; /* 変更: 1vwから0.8vwに縮小 */
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    #ranking-modal button:hover {
-        background: #45a049;
-    }
-
-    /* ------------------------------------------------------------- */
-    /* オーバーレイ (Overlay) */
-    /* ------------------------------------------------------------- */
-    #overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 999; /* Below ranking modal */
-    }
-
-    /* ------------------------------------------------------------- */
-    /* ゲーム画面 (Game Screen) */
-    /* ------------------------------------------------------------- */
-    #game {
-        position: relative;
-        aspect-ratio: 8 / 4; /* Maintain 800:300 ratio */
-        width: 70vw; 
-        max-width: 720px; 
-        
-        background: url('上空.jpg') repeat-x center center;
-        background-size: cover;
-        border: 0.2vw solid #000; 
-        margin: 0 auto; 
-        max-height: 60vh;
-        max-height: 60dvh;
-        box-sizing: border-box;
-        overflow: hidden;
-        background-position: 0 0;
-        
-        display: none; /* Hidden by default, shown on game start */
-    }
-
-    #ui-container {
-        position: absolute;
-        top: 0.5vh; /* 上から1vhの位置に固定（必要に応じて調整） */
-        width: 100%;
-        text-align: center;
-        z-index: 10;
-    }
-
-    #game.fade {
-        transition: opacity 0.3s ease;
-        opacity: 0;
-    }
-    
-    /* ------------------------------------------------------------- */
-    /* ゲームUI要素 (Game UI Elements) */
-    /* ------------------------------------------------------------- */
-    h1 { /* "↑↑でレーン移動！ →で加速" heading */
-        font-size: 2.2vw; /* 変更: 3vwから2.8vwに縮小 */
-        margin-top: 0px; /* 変更: 1vhから0.8vhに縮小 */
-        margin-bottom: 0px; /* 変更: 1vhから0.8vhに縮小 */
-    }
-    #question {
-        font-size: 1.8vw;
-        margin-top: 0.2vh;       
-        margin-bottom: 0.2vh;
-        line-height: 1.1;        /* 行間も詰める */
-    }
-    #target {
-        font-size: 2.8vw; /* 変更: 4.5vwから4vwに縮小 */
-        color: #d32f2f;
-        font-weight: bold;
-        padding: 0 0.0vw; /* 変更: 1vwから0.8vwに縮小 */
-        border-radius: 0.0vw; /* 変更: 0.5vwから0.4vwに縮小 */
-    }
-    #distance {
-        font-size: 1.6vw; /* 変更: 2.5vwから2.2vwに縮小 */
-        margin-top: 0.4vh; /* 変更: 0.5vhから0.4vhに縮小 */
-        margin-bottom: 0.4vh; /* 変更: 0.5vhから0.4vhに縮小 */
-    }
-    #lives {
-        height: 4.2vh; /* 変更: 5vhから4.5vhに縮小 */
-        font-size: 1.8vw; /* 変更: 3.5vwから3.2vwに縮小 */
-        line-height: 4.2vh; /* Match height for vertical centering */
-        margin-top: 0.4vh; /* 変更: 0.5vhから0.4vhに縮小 */
-        margin-bottom: 0.4vh; /* 変更: 0.5vhから0.4vhに縮小 */
-    }
-
-    /* ------------------------------------------------------------- */
-    /* レーン (Lanes) */
-    /* ------------------------------------------------------------- */
-    .lane {
-        position: absolute;
-        width: 100%;
-        height: 33.33%; /* Each lane takes 1/3 of game height */
-        border-top: 0.08vw solid #ccc; /* 変更: 0.1vwから0.08vwに縮小 */
-    }
-    /* Positioning lanes within the game area */
-    .lane:nth-child(1) { top: 0; }
-    .lane:nth-child(2) { top: 33.33%; }
-    .lane:nth-child(3) { top: 66.66%; }
-
-    /* ------------------------------------------------------------- */
-    /* プレイヤー (Player) */
-    /* ------------------------------------------------------------- */
-    #player {
-        position: absolute; 
-        left: 6.25%; /* 50px / 800px = 6.25% of game width */
-        width: 6.25%; /* 50px / 800px = 6.25% of game width */
-        height: 16.67%; /* 50px / 300px = ~16.67% of game height */
-        background: url('type_zero_anf.gif') no-repeat center center;
-        background-size: 90%; /* Keep GIF scaled within player div */
-        transition: top 0.1s;
-    }
-
-    /* ------------------------------------------------------------- */
-    /* 障害物 (Obstacles) */
-    /* ------------------------------------------------------------- */
-    .obstacle {
-        position: absolute;
-        width: 16.67%; /* 100px / 800px = 12.5% of game width */
-        height: 16.67%; /* 50px / 300px = ~16.67% of game height */
-        background: rgba(173, 216, 230, 0.85);
-        font-size: 2.4vw; /* 変更: 2.75vwから2.5vwに縮小 */
-        text-align: center;
-        line-height: 180%; /* Vertical align text within obstacle height */
-        font-weight: bold;
-        font-family: "Consolas", "Courier New", monospace;
-        transform: translateZ(0);
-        will-change: transform;
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
-        border: 0.25vw solid #007acc; /* 変更: 0.25vwから0.2vwに縮小 */
-        border-radius: 1.0vw; /* 変更: 1vwから0.8vwに縮小 */
-        box-shadow: 0.2vw 0.2vw 0.6vw rgba(0, 0, 0, 0.3); /* 変更: 0.25vw 0.25vw 0.75vw から縮小 */
-        color: #fff;
-        text-shadow: 0.1vw 0.1vw 0.2vw #000; /* 変更: 0.125vw 0.125vw 0.25vw から縮小 */
-    }
-
-    /* ------------------------------------------------------------- */
-    /* コンボゲージ (Combo Bar) */
-    /* ------------------------------------------------------------- */
-    #combo-bar-container {
-        width: 33vw; /* 変更: 37.5vwから33vwに縮小 */
-        max-width: 270px; /* 変更: 300pxから270pxに縮小 */
-        height: 2.8vh; /* 変更: 3.125vhから2.8vhに縮小 */
-        background-color: #ccc;
-        border-radius: 1.2vw; /* 変更: 1.5vwから1.2vwに縮小 */
-        margin: 1.2vh auto; /* 変更: 1.5vhから1.2vhに縮小 */
-        overflow: hidden;
-        border: 0.2vw solid #333; /* 変更: 0.25vwから0.2vwに縮小 */
-    }
-    #combo-bar {
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(90deg, #4CAF50, #8BC34A);
-        transition: width 0.2s ease;
-    }
-    @keyframes flashCombo {
-        0%, 100% { background-color: #4CAF50; }
-        50% { background-color: gold; }
-    }
-    .combo-flash {
-        animation: flashCombo 0.5s ease;
-    }
-</style>
-<body>
-
-    <div id="title-screen">
-        <h1>計算疾走！RUN×算</h1>
-        <button id="start-button">ゲームスタート</button>
-        <button id="adult-mode-button">オトナモード</button>
-        <div id="skin-select">
-            <p>スキンを選ぼう！</p>
-            <div>
-                <img src="type_zero_anf.gif" class="skin-option" onclick="selectSkin('type_zero_anf.gif')">
-                <img src="fighter_3body_an.gif" class="skin-option" onclick="selectSkin('fighter_3body_an.gif')">
-                <img src="fighter_f104_an.gif" class="skin-option" onclick="selectSkin('fighter_f104_an.gif')">
-                <img src="type_zero21_anf.gif" class="skin-option" onclick="selectSkin('type_zero21_anf.gif')">
-                <img src="helicopter_2.gif" class="skin-option" onclick="selectSkin('helicopter_2.gif')">
-                <img src="bird18.gif" class="skin-option" onclick="selectSkin('bird18.gif')">
-                <img src="karasu.gif" class="skin-option" onclick="selectSkin('karasu.gif')">
-                <img src="chiken.gif" class="skin-option" onclick="selectSkin('chiken.gif')">
-                <img src="dog.gif" class="skin-option" onclick="selectSkin('dog.gif')">
-                <img src="angel.gif" class="skin-option" onclick="selectSkin('angel.gif')">
-                <img src="ufo.gif" class="skin-option" onclick="selectSkin('ufo.gif')">
-            </div>
-        </div>
-    </div>
-    
-    <audio id="bgm" src="8ビットの冒険.mp3" loop></audio>
-    <audio id="se-correct" src="決定ボタンを押す53.mp3"></audio>
-    <audio id="se-wrong" src="ビープ音4.mp3"></audio>
-
-    <div id="ui-container">
-        <h1>↑↑でレーン移動！　→で加速</h1>
-        <div id="question">答えが <span id="target">?</span> になる式を選ぼう！</div>
-        <div id="game-stats" style="display: flex; justify-content: center; align-items: center; gap: 3vw;">
-            <div id="distance">00000m</div>
-            <div id="lives">❤️❤️❤️</div>
-        </div>
-        <div id="combo-bar-container">
-            <div id="combo-bar"></div>
-    </div>
-    <div id="game">
-        <div id="player"></div>
-        <div id="ranking-modal">
-            <h2>🏁 GAME OVER！</h2>
-            <p id="final-score">あなたのスコア: 0</p>
-            <h3>🏆 ランキング</h3>
-            <ol id="ranking-list"></ol>
-            <button onclick="restartGame()">リトライ</button>
-            <button onclick="returnToTitle()">タイトル画面に戻る</button>
-        </div>
-    </div>
-
-    <div id="overlay"></div>
-
-    <script>
-        const game = document.getElementById("game");
-        const player = document.getElementById("player");
-        const targetSpan = document.getElementById("target");
-        const livesDisplay = document.getElementById("lives");
-
-        const bgm = document.getElementById("bgm");
-        const seCorrect = document.getElementById("se-correct");
-        const seWrong = document.getElementById("se-wrong");
-
-        // レーンのY座標は、ゲーム画面の高さに応じて動的に計算します
-        const lanes = [0, 0, 0]; // Initial values will be set by updateLanePositions()
-
-        const backgrounds = [
-            "上空.jpg", "夕方.jpg", "夜.jpg"
-        ];
-        let backgroundIndex = 0;
-        let currentLane = 1;
-        let score = 0;
-        let targetAnswer = 0;
-        let lives = 3;
-        let isSpawning = false;
-        let hasAnswered = false;
-        let started = false; // BGM play flag
-        let isAdultMode = false;
-        let combo = 0;
-
-        // ▼ 背景スクロール (Background Scroll)
-        let bgPos = 0;
-        let distance = 0; // Travel distance
-        setInterval(() => {
-            // Adjust background movement speed based on current game width vs. original 800px
-            // This ensures consistent visual speed regardless of scaling
-            bgPos -= speed / (800 / game.offsetWidth); 
-            game.style.backgroundPosition = `${bgPos}px 0`;
-
-            // Add distance (proportional to speed)
-            distance += speed * 0.01;
-            const formattedDistance = Math.floor(distance).toString().padStart(5, '0') + 'm';
-            document.getElementById('distance').textContent = formattedDistance;
-
-        }, 20);
-
-        let selectedSkin = 'type_zero_anf.gif'; // Default skin
-        function selectSkin(skinFile) {
-            selectedSkin = skinFile;
-            player.style.backgroundImage = `url('${selectedSkin}')`;
-
-            // Reset all borders then apply to selected skin, using vw for border thickness
-            document.querySelectorAll('.skin-option').forEach(img => {
-                img.style.border = '0.2vw solid transparent'; // 変更: 0.25vwから0.2vwに縮小
-            });
-            const selectedImg = Array.from(document.querySelectorAll('.skin-option')).find(img => img.src.includes(skinFile));
-            if (selectedImg) {
-                selectedImg.style.border = '0.2vw solid #4CAF50'; // 変更: 0.25vwから0.2vwに縮小
-            }
+    <style>
+        /* ------------------------------------------------------------- */
+        /* 全体設定 */
+        /* ------------------------------------------------------------- */
+        body {
+            font-family: sans-serif;
+            background: #eef;
+            text-align: center;
+            margin: 0;
+            /* Game content should be centered vertically and horizontally */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /*min-height: 100vh; /* Ensure body takes full viewport height */
+            height: 100vh;
+            height: 100dhv;
+            width: 100vw;
+            overflow: hidden; /* Prevent scrolling of the entire page */
+            position: fixed;
+            top: 0;
+            left: 0;
         }
 
-        // Game's initial speed
-        const INITIAL_GAME_SPEED = 2; 
-        let speed = INITIAL_GAME_SPEED; // Current game speed (used for obstacle movement)
-        let baseGameSpeed = INITIAL_GAME_SPEED; // Base game speed that permanently increases with score
+        /* ------------------------------------------------------------- */
+        /* タイトル画面 (Title Screen) */
+        /* ------------------------------------------------------------- */
+        #title-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw; /* Occupy full viewport width */
+            background-color: #e0f7fa;
+            position: fixed; /* Keep it fixed over the whole screen */
+            top: 0;
+            left: 0;
+            z-index: 2000; /* Ensure it's on top */
+        }
+        #title-screen h1 {
+            font-size: 4vw; /* 変更: 6vwから5vwに縮小 */
+            color: #333;
+        }
+        #start-button, #adult-mode-button {
+            margin-top: 2.4vh; 
+            padding: 1.8vh 3.0vw; 
+            font-size: 1.8vw; 
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 0.8vw; 
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #adult-mode-button {
+            background-color: #f44336;
+        }
+        #start-button:hover, #adult-mode-button:hover {
+            background-color: #45a049;
+        }
 
-        // BGM's initial playback rate
-        const INITIAL_BGM_PLAYBACK_RATE = 1.0; 
-        let currentBaseBGMPlaybackRate = INITIAL_BGM_PLAYBACK_RATE; // Base BGM rate that permanently increases
+        /* Skin selection modal */
+        #skin-select {
+            margin-top: 2.2vh; /* 変更: 2.5vhから2.2vhに縮小 */
+        }
+        #skin-select p {
+            font-size: 2vw; /* 変更: 2.5vwから2.2vwに縮小 */
+        }
+        #skin-select div {
+            display: flex;
+            gap: 0.8vw; /* 変更: 1vwから0.8vwに縮小 */
+            margin-top: 0.8vh; /* 変更: 1vhから0.8vhに縮小 */
+        }
+        .skin-option {
+            width: 5vw; /* 変更: 6vwから5vwに縮小 */
+            height: 5vw; /* 変更: 6vwから5vwに縮小 */
+            cursor: pointer;
+            border: 0.2vw solid transparent; /* 変更: 0.25vwから0.2vwに縮小 */
+            border-radius: 0.8vw; /* 変更: 1vwから0.8vwに縮小 */
+        }
+        .skin-option:hover {
+            border-color: #4CAF50;
+        }
 
-        let isAccelerating = false; // Flag to check if accelerating
 
-        // -------------------------------------------------------------
-        // タッチ操作関連 (Touch Controls)
-        // -------------------------------------------------------------
-        let touchStartY = 0; // Stores initial Y position of touch
-        let touchStartX = 0; // Stores initial X position of touch
-        // SWIPE_THRESHOLD is an absolute pixel value; we'll convert it to be responsive
-        const SWIPE_THRESHOLD_ORIGINAL_PX = 50; 
+        /* ------------------------------------------------------------- */
+        /* ランキングモーダル (Ranking Modal) */
+        /* ------------------------------------------------------------- */
+        #ranking-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 3.5vh 3.5vw; /* 変更: 4vh 4vw から縮小 */
+            border: 0.2vw solid #000; /* 変更: 0.25vwから0.2vwに縮小 */
+            border-radius: 1.8vw; /* 変更: 2vwから1.8vwに縮小 */
+            z-index: 1000;
+            width: 65vw; /* 変更: 70vwから65vwに縮小 */
+            max-width: 380px; /* 変更: 400pxから380pxに縮小 */
+        }
+        #ranking-modal h2 {
+            font-size: 3vw; /* 変更: 4vwから3.5vwに縮小 */
+            margin-bottom: 1.8vh; /* 変更: 2vhから1.8vhに縮小 */
+        }
+        #ranking-modal p, #ranking-modal h3 {
+            font-size: 2vw; /* 変更: 2.5vwから2.2vwに縮小 */
+            margin-bottom: 0.8vh; /* 変更: 1vhから0.8vhに縮小 */
+        }
+        #ranking-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-left: 0;
+            list-style: none;
+            margin-top: 0.8vh;
+            margin-bottom: 1.8vh;
+        }
+        #ranking-list li {
+            margin: 0.6vh 0; /* 変更: 0.8vhから0.6vhに縮小 */
+            font-size: 1.6vw; /* 変更: 2vwから1.8vwに縮小 */
+            font-weight: bold;
+            color: #333;
+        }
+        #ranking-modal button {
+            margin-top: 2.2vh; /* 変更: 2.5vhから2.2vhに縮小 */
+            padding: 1.3vh 2.8vw; /* 変更: 1.5vh 3vw から縮小 */
+            font-size: 1.8vw; /* 変更: 2.2vwから2vwに縮小 */
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 0.8vw; /* 変更: 1vwから0.8vwに縮小 */
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #ranking-modal button:hover {
+            background: #45a049;
+        }
 
-        const gameArea = document.getElementById("game");
+        /* ------------------------------------------------------------- */
+        /* オーバーレイ (Overlay) */
+        /* ------------------------------------------------------------- */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999; /* Below ranking modal */
+        }
 
-        if (gameArea) {
-            // Touch start event listener
-            gameArea.addEventListener("touchstart", (e) => {
-                touchStartY = e.touches[0].clientY;
-                touchStartX = e.touches[0].clientX;
+        /* ------------------------------------------------------------- */
+        /* ゲーム画面 (Game Screen) */
+        /* ------------------------------------------------------------- */
+        #game {
+            position: relative;
+            aspect-ratio: 8 / 4; /* Maintain 800:300 ratio */
+            width: 70vw; 
+            max-width: 720px; 
+            
+            background: url('上空.jpg') repeat-x center center;
+            background-size: cover;
+            border: 0.2vw solid #000; 
+            margin: 0 auto; 
+            max-height: 60vh;
+            max-height: 60dvh;
+            box-sizing: border-box;
+            overflow: hidden;
+            background-position: 0 0;
+            
+            display: none; /* Hidden by default, shown on game start */
+        }
 
+        #ui-container {
+            position: absolute;
+            top: 0.5vh; /* 上から1vhの位置に固定（必要に応じて調整） */
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+        }
+
+        #game.fade {
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+        
+        /* ------------------------------------------------------------- */
+        /* ゲームUI要素 (Game UI Elements) */
+        /* ------------------------------------------------------------- */
+        h1 { /* "↑↑でレーン移動！ →で加速" heading */
+            font-size: 2.2vw; /* 変更: 3vwから2.8vwに縮小 */
+            margin-top: 0px; /* 変更: 1vhから0.8vhに縮小 */
+            margin-bottom: 0px; /* 変更: 1vhから0.8vhに縮小 */
+        }
+        #question {
+            font-size: 1.8vw;
+            margin-top: 0.2vh;       
+            margin-bottom: 0.2vh;
+            line-height: 1.1;        /* 行間も詰める */
+        }
+        #target {
+            font-size: 2.8vw; /* 変更: 4.5vwから4vwに縮小 */
+            color: #d32f2f;
+            font-weight: bold;
+            padding: 0 0.0vw; /* 変更: 1vwから0.8vwに縮小 */
+            border-radius: 0.0vw; /* 変更: 0.5vwから0.4vwに縮小 */
+        }
+        #distance {
+            font-size: 1.6vw; /* 変更: 2.5vwから2.2vwに縮小 */
+            margin-top: 0.4vh; /* 変更: 0.5vhから0.4vhに縮小 */
+            margin-bottom: 0.4vh; /* 変更: 0.5vhから0.4vhに縮小 */
+        }
+        #lives {
+            height: 4.2vh; /* 変更: 5vhから4.5vhに縮小 */
+            font-size: 1.8vw; /* 変更: 3.5vwから3.2vwに縮小 */
+            line-height: 4.2vh; /* Match height for vertical centering */
+            margin-top: 0.4vh; /* 変更: 0.5vhから0.4vhに縮小 */
+            margin-bottom: 0.4vh; /* 変更: 0.5vhから0.4vhに縮小 */
+        }
+
+        /* ------------------------------------------------------------- */
+        /* レーン (Lanes) */
+        /* ------------------------------------------------------------- */
+        .lane {
+            position: absolute;
+            width: 100%;
+            height: 33.33%; /* Each lane takes 1/3 of game height */
+            border-top: 0.08vw solid #ccc; /* 変更: 0.1vwから0.08vwに縮小 */
+        }
+        /* Positioning lanes within the game area */
+        .lane:nth-child(1) { top: 0; }
+        .lane:nth-child(2) { top: 33.33%; }
+        .lane:nth-child(3) { top: 66.66%; }
+
+        /* ------------------------------------------------------------- */
+        /* プレイヤー (Player) */
+        /* ------------------------------------------------------------- */
+        #player {
+            position: absolute; 
+            left: 6.25%; /* 50px / 800px = 6.25% of game width */
+            width: 6.25%; /* 50px / 800px = 6.25% of game width */
+            height: 16.67%; /* 50px / 300px = ~16.67% of game height */
+            background: url('type_zero_anf.gif') no-repeat center center;
+            background-size: 90%; /* Keep GIF scaled within player div */
+            transition: top 0.1s;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* 障害物 (Obstacles) */
+        /* ------------------------------------------------------------- */
+        .obstacle {
+            position: absolute;
+            width: 16.67%; /* 100px / 800px = 12.5% of game width */
+            height: 16.67%; /* 50px / 300px = ~16.67% of game height */
+            background: rgba(173, 216, 230, 0.85);
+            font-size: 2.4vw; /* 変更: 2.75vwから2.5vwに縮小 */
+            text-align: center;
+            line-height: 180%; /* Vertical align text within obstacle height */
+            font-weight: bold;
+            font-family: "Consolas", "Courier New", monospace;
+            transform: translateZ(0);
+            will-change: transform;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            border: 0.25vw solid #007acc; /* 変更: 0.25vwから0.2vwに縮小 */
+            border-radius: 1.0vw; /* 変更: 1vwから0.8vwに縮小 */
+            box-shadow: 0.2vw 0.2vw 0.6vw rgba(0, 0, 0, 0.3); /* 変更: 0.25vw 0.25vw 0.75vw から縮小 */
+            color: #fff;
+            text-shadow: 0.1vw 0.1vw 0.2vw #000; /* 変更: 0.125vw 0.125vw 0.25vw から縮小 */
+        }
+
+        /* ------------------------------------------------------------- */
+        /* コンボゲージ (Combo Bar) */
+        /* ------------------------------------------------------------- */
+        #combo-bar-container {
+            width: 33vw; /* 変更: 37.5vwから33vwに縮小 */
+            max-width: 270px; /* 変更: 300pxから270pxに縮小 */
+            height: 2.8vh; /* 変更: 3.125vhから2.8vhに縮小 */
+            background-color: #ccc;
+            border-radius: 1.2vw; /* 変更: 1.5vwから1.2vwに縮小 */
+            margin: 1.2vh auto; /* 変更: 1.5vhから1.2vhに縮小 */
+            overflow: hidden;
+            border: 0.2vw solid #333; /* 変更: 0.25vwから0.2vwに縮小 */
+        }
+        #combo-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.2s ease;
+        }
+        @keyframes flashCombo {
+            0%, 100% { background-color: #4CAF50; }
+            50% { background-color: gold; }
+        }
+        .combo-flash {
+            animation: flashCombo 0.5s ease;
+        }
+    </style>
+    <body>
+
+        <div id="title-screen">
+            <h1>計算疾走！RUN×算</h1>
+            <button id="start-button">ゲームスタート</button>
+            <button id="adult-mode-button">オトナモード</button>
+            <div id="skin-select">
+                <p>スキンを選ぼう！</p>
+                <div>
+                    <img src="type_zero_anf.gif" class="skin-option" onclick="selectSkin('type_zero_anf.gif')">
+                    <img src="fighter_3body_an.gif" class="skin-option" onclick="selectSkin('fighter_3body_an.gif')">
+                    <img src="fighter_f104_an.gif" class="skin-option" onclick="selectSkin('fighter_f104_an.gif')">
+                    <img src="type_zero21_anf.gif" class="skin-option" onclick="selectSkin('type_zero21_anf.gif')">
+                    <img src="helicopter_2.gif" class="skin-option" onclick="selectSkin('helicopter_2.gif')">
+                    <img src="bird18.gif" class="skin-option" onclick="selectSkin('bird18.gif')">
+                    <img src="karasu.gif" class="skin-option" onclick="selectSkin('karasu.gif')">
+                    <img src="chiken.gif" class="skin-option" onclick="selectSkin('chiken.gif')">
+                    <img src="dog.gif" class="skin-option" onclick="selectSkin('dog.gif')">
+                    <img src="angel.gif" class="skin-option" onclick="selectSkin('angel.gif')">
+                    <img src="ufo.gif" class="skin-option" onclick="selectSkin('ufo.gif')">
+                </div>
+            </div>
+        </div>
+        
+        <audio id="bgm" src="8ビットの冒険.mp3" loop></audio>
+        <audio id="se-correct" src="決定ボタンを押す53.mp3"></audio>
+        <audio id="se-wrong" src="ビープ音4.mp3"></audio>
+
+        <div id="ui-container">
+            <h1>↑↑でレーン移動！　→で加速</h1>
+            <div id="question">答えが <span id="target">?</span> になる式を選ぼう！</div>
+            <div id="game-stats" style="display: flex; justify-content: center; align-items: center; gap: 3vw;">
+                <div id="distance">00000m</div>
+                <div id="lives">❤️❤️❤️</div>
+            </div>
+            <div id="combo-bar-container">
+                <div id="combo-bar"></div>
+            </div>
+        </div>
+        <div id="game">
+            <div id="player"></div>
+            <div id="ranking-modal">
+                <h2>🏁 GAME OVER！</h2>
+                <p id="final-score">あなたのスコア: 0</p>
+                <h3>🏆 ランキング</h3>
+                <ol id="ranking-list"></ol>
+                <button onclick="restartGame()">リトライ</button>
+                <button onclick="returnToTitle()">タイトル画面に戻る</button>
+            </div>
+        </div>
+
+        <div id="overlay"></div>
+
+        <script>
+            const game = document.getElementById("game");
+            const player = document.getElementById("player");
+            const targetSpan = document.getElementById("target");
+            const livesDisplay = document.getElementById("lives");
+
+            const bgm = document.getElementById("bgm");
+            const seCorrect = document.getElementById("se-correct");
+            const seWrong = document.getElementById("se-wrong");
+
+            // レーンのY座標は、ゲーム画面の高さに応じて動的に計算します
+            const lanes = [0, 0, 0]; // Initial values will be set by updateLanePositions()
+
+            const backgrounds = [
+                "上空.jpg", "夕方.jpg", "夜.jpg"
+            ];
+            let backgroundIndex = 0;
+            let currentLane = 1;
+            let score = 0;
+            let targetAnswer = 0;
+            let lives = 3;
+            let isSpawning = false;
+            let hasAnswered = false;
+            let started = false; // BGM play flag
+            let isAdultMode = false;
+            let combo = 0;
+
+            // ▼ 背景スクロール (Background Scroll)
+            let bgPos = 0;
+            let distance = 0; // Travel distance
+            setInterval(() => {
+                // Adjust background movement speed based on current game width vs. original 800px
+                // This ensures consistent visual speed regardless of scaling
+                bgPos -= speed / (800 / game.offsetWidth); 
+                game.style.backgroundPosition = `${bgPos}px 0`;
+
+                // Add distance (proportional to speed)
+                distance += speed * 0.01;
+                const formattedDistance = Math.floor(distance).toString().padStart(5, '0') + 'm';
+                document.getElementById('distance').textContent = formattedDistance;
+
+            }, 20);
+
+            let selectedSkin = 'type_zero_anf.gif'; // Default skin
+            function selectSkin(skinFile) {
+                selectedSkin = skinFile;
+                player.style.backgroundImage = `url('${selectedSkin}')`;
+
+                // Reset all borders then apply to selected skin, using vw for border thickness
+                document.querySelectorAll('.skin-option').forEach(img => {
+                    img.style.border = '0.2vw solid transparent'; // 変更: 0.25vwから0.2vwに縮小
+                });
+                const selectedImg = Array.from(document.querySelectorAll('.skin-option')).find(img => img.src.includes(skinFile));
+                if (selectedImg) {
+                    selectedImg.style.border = '0.2vw solid #4CAF50'; // 変更: 0.25vwから0.2vwに縮小
+                }
+            }
+
+            // Game's initial speed
+            const INITIAL_GAME_SPEED = 2; 
+            let speed = INITIAL_GAME_SPEED; // Current game speed (used for obstacle movement)
+            let baseGameSpeed = INITIAL_GAME_SPEED; // Base game speed that permanently increases with score
+
+            // BGM's initial playback rate
+            const INITIAL_BGM_PLAYBACK_RATE = 1.0; 
+            let currentBaseBGMPlaybackRate = INITIAL_BGM_PLAYBACK_RATE; // Base BGM rate that permanently increases
+
+            let isAccelerating = false; // Flag to check if accelerating
+
+            // -------------------------------------------------------------
+            // タッチ操作関連 (Touch Controls)
+            // -------------------------------------------------------------
+            let touchStartY = 0; // Stores initial Y position of touch
+            let touchStartX = 0; // Stores initial X position of touch
+            // SWIPE_THRESHOLD is an absolute pixel value; we'll convert it to be responsive
+            const SWIPE_THRESHOLD_ORIGINAL_PX = 50; 
+
+            const gameArea = document.getElementById("game");
+
+            if (gameArea) {
+                // Touch start event listener
+                gameArea.addEventListener("touchstart", (e) => {
+                    touchStartY = e.touches[0].clientY;
+                    touchStartX = e.touches[0].clientX;
+
+                    if (!started) {
+                        bgm.volume = 0.005;
+                        bgm.play().catch(error => console.log("BGM再生失敗", error));
+                        started = true;
+                        bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE;
+                    }
+                }, { passive: true });
+
+                // Touch move event listener
+                gameArea.addEventListener("touchmove", (e) => {
+                    e.preventDefault(); // Prevent default browser scrolling/zooming
+                }, { passive: false }); // Needs to be false to allow preventDefault()
+
+                // Touch end event listener
+                gameArea.addEventListener("touchend", (e) => {
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const touchEndX = e.changedTouches[0].clientX;
+
+                    const deltaY = touchStartY - touchEndY;
+                    const deltaX = touchEndX - touchStartX;
+
+                    // Calculate responsive swipe thresholds based on game area's current dimensions
+                    // Original game height was 300px, original width 800px.
+                    const responsiveSwipeThresholdY = gameArea.offsetHeight * (SWIPE_THRESHOLD_ORIGINAL_PX / 300); 
+                    const responsiveSwipeThresholdX = gameArea.offsetWidth * (SWIPE_THRESHOLD_ORIGINAL_PX / 800);
+
+                    // Handle vertical swipes (lane change)
+                    if (Math.abs(deltaY) > responsiveSwipeThresholdY && Math.abs(deltaY) > Math.abs(deltaX)) {
+                        if (deltaY > 0 && currentLane > 0) { // Swiped up
+                            currentLane--;
+                        } else if (deltaY < 0 && currentLane < 2) { // Swiped down
+                            currentLane++;
+                        }
+                        player.style.top = lanes[currentLane] + "px"; // Update player position
+                    }
+                    // Handle horizontal swipes (accelerate/decelerate)
+                    else if (Math.abs(deltaX) > responsiveSwipeThresholdX && Math.abs(deltaX) > Math.abs(deltaY)) {
+                        if (deltaX > 0 && !isAccelerating) { // Swiped right (accelerate)
+                            speed = baseGameSpeed * 2;
+                            bgm.playbackRate = currentBaseBGMPlaybackRate * 2;
+                            isAccelerating = true;
+                        } else if (deltaX < 0 && isAccelerating) { // Swiped left (decelerate)
+                            speed = baseGameSpeed;
+                            bgm.playbackRate = currentBaseBGMPlaybackRate;
+                            isAccelerating = false;
+                        }
+                    }
+                });
+            }
+
+            // -------------------------------------------------------------
+            // レーン位置の動的計算 (Dynamic Lane Position Calculation)
+            // -------------------------------------------------------------
+            function updateLanePositions() {
+                const gameHeight = game.offsetHeight; // Get current height of #game element in pixels
+
+                // Calculate lane Y coordinates proportionally based on original 300px game height
+                // These are pixel values for player.style.top
+                lanes[0] = gameHeight * (25 / 300); // Original top lane Y was 25px
+                lanes[1] = gameHeight * (125 / 300); // Original middle lane Y was 125px
+                lanes[2] = gameHeight * (225 / 300); // Original bottom lane Y was 225px
+
+                // Update player's position
+                player.style.top = lanes[currentLane] + "px";
+            }
+
+            // -------------------------------------------------------------
+            // ゲーム開始/リトライ/タイトルに戻る (Game Start/Retry/Return to Title)
+            // -------------------------------------------------------------
+            document.getElementById("start-button").addEventListener("click", function() {
+                document.getElementById("title-screen").style.display = "none";
+                game.style.display = "block"; // Show game screen
+                updateGameLayoutAndStart();
+                isAdultMode = false;
+            });
+
+            document.getElementById('adult-mode-button').addEventListener('click', () => {
+                document.getElementById("title-screen").style.display = "none";
+                game.style.display = "block"; // Show game screen
+                updateGameLayoutAndStart();
+                isAdultMode = true;
+            });
+
+            function updateGameLayoutAndStart() {
+                updateLanePositions(); // Recalculate lane positions based on current game screen size
+                player.style.backgroundImage = `url('${selectedSkin}')`;
+                // Reset game state
+                distance = 0;
+                score = 0;
+                lives = 3;
+                combo = 0;
+                baseGameSpeed = INITIAL_GAME_SPEED;
+                speed = INITIAL_GAME_SPEED;
+                currentBaseBGMPlaybackRate = INITIAL_BGM_PLAYBACK_RATE;
+                bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE;
+                isAccelerating = false;
+                updateLivesDisplay();
+                updateComboBar();
+                game.style.backgroundImage = `url('${backgrounds[0]}')`; // Reset background
+                game.style.opacity = 1; // Ensure full opacity
+                bgm.currentTime = 0; // Reset BGM
+
+                // ★追加: ここでisSpawningを確実にfalseにリセットします★
+                isSpawning = false; 
+                
+                // Remove all existing obstacles from the game area before starting a new round
+                document.querySelectorAll('.obstacle').forEach(obstacle => {
+                    obstacle.remove();
+                });
+                
+                // Only play BGM if not already started by touch (for first touch case)
                 if (!started) {
                     bgm.volume = 0.005;
                     bgm.play().catch(error => console.log("BGM再生失敗", error));
                     started = true;
-                    bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE;
                 }
-            }, { passive: true });
+                spawnChallenge();
+            }
 
-            // Touch move event listener
-            gameArea.addEventListener("touchmove", (e) => {
-                e.preventDefault(); // Prevent default browser scrolling/zooming
-            }, { passive: false }); // Needs to be false to allow preventDefault()
 
-            // Touch end event listener
-            gameArea.addEventListener("touchend", (e) => {
-                const touchEndY = e.changedTouches[0].clientY;
-                const touchEndX = e.changedTouches[0].clientX;
+            function restartGame() {
+                document.getElementById("ranking-modal").style.display = "none";
+                document.getElementById("overlay").style.display = "none"; // Hide overlay too
+                updateGameLayoutAndStart();
+            }
 
-                const deltaY = touchStartY - touchEndY;
-                const deltaX = touchEndX - touchStartX;
+            function returnToTitle() {
+                document.getElementById("ranking-modal").style.display = "none";
+                document.getElementById("overlay").style.display = "none"; // Hide overlay too
+                document.getElementById("title-screen").style.display = "flex";
+                game.style.display = "none"; // Hide game screen
+                bgm.pause(); // Stop BGM
+                started = false; // Reset BGM started flag
+                // Reset game state for next play
+                score = 0;
+                distance = 0;
+                speed = INITIAL_GAME_SPEED;
+                lives = 3;
+                combo = 0;
+                updateHearts(); // Update heart display
+                updateLivesDisplay(); // Ensure lives display is reset
+                currentLane = 1; // Reset player lane
+                updateLanePositions(); // Recalculate and set player top
+                bgPos = 0; // Reset background position
+                backgroundIndex = 0; // Reset background image
+                game.style.backgroundImage = `url('${backgrounds[backgroundIndex]}')`;
+                bgm.currentTime = 0; // Reset BGM time
+                bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE; // Reset BGM rate
+                isSpawning = false; // Allow new challenge to spawn
+            }
 
-                // Calculate responsive swipe thresholds based on game area's current dimensions
-                // Original game height was 300px, original width 800px.
-                const responsiveSwipeThresholdY = gameArea.offsetHeight * (SWIPE_THRESHOLD_ORIGINAL_PX / 300); 
-                const responsiveSwipeThresholdX = gameArea.offsetWidth * (SWIPE_THRESHOLD_ORIGINAL_PX / 800);
+            // -------------------------------------------------------------
+            // 式をランダム生成 (Generate Random Expressions)
+            // -------------------------------------------------------------
+            function generateExpressions() {
+                const ops = ["+", "-", "*", "/"];
+                const expressions = [];
 
-                // Handle vertical swipes (lane change)
-                if (Math.abs(deltaY) > responsiveSwipeThresholdY && Math.abs(deltaY) > Math.abs(deltaX)) {
-                    if (deltaY > 0 && currentLane > 0) { // Swiped up
-                        currentLane--;
-                    } else if (deltaY < 0 && currentLane < 2) { // Swiped down
-                        currentLane++;
+                function isInteger(n) {
+                    return Number.isInteger(n);
+                }
+
+                function safeEval(expr) {
+                    try {
+                        const result = eval(expr);
+                        if (!Number.isFinite(result)) return null;
+                        return parseFloat(result.toFixed(2));
+                    } catch {
+                        return null;
                     }
-                    player.style.top = lanes[currentLane] + "px"; // Update player position
                 }
-                // Handle horizontal swipes (accelerate/decelerate)
-                else if (Math.abs(deltaX) > responsiveSwipeThresholdX && Math.abs(deltaX) > Math.abs(deltaY)) {
-                    if (deltaX > 0 && !isAccelerating) { // Swiped right (accelerate)
-                        speed = baseGameSpeed * 2;
-                        bgm.playbackRate = currentBaseBGMPlaybackRate * 2;
-                        isAccelerating = true;
-                    } else if (deltaX < 0 && isAccelerating) { // Swiped left (decelerate)
-                        speed = baseGameSpeed;
-                        bgm.playbackRate = currentBaseBGMPlaybackRate;
-                        isAccelerating = false;
+
+                if (isAdultMode) {
+                    const isHardQuestion = (score % 5 === 0); // 5スコアごとにハード
+
+                    if (isHardQuestion) {
+                        // ▼ 2項式（50以下で割り切れる式を含む）
+                        while (true) {
+                            const a = Math.floor(Math.random() * 50) + 1;
+                            const b = Math.floor(Math.random() * 50) + 1;
+                            const op = ops[Math.floor(Math.random() * ops.length)];
+
+                            if (op === "/" && a % b !== 0) continue;
+
+                            const expr = `${a}${op}${b}`;
+                            const answer = safeEval(expr);
+                            if (answer === null) continue;
+
+                            targetAnswer = answer;
+                            expressions.push(expr);
+                            break;
+                        }
+
+                        // ダミー作成（異なる答え・整数）
+                        while (expressions.length < 3) {
+                            const a = Math.floor(Math.random() * 50) + 1;
+                            const b = Math.floor(Math.random() * 50) + 1;
+                            const op = ops[Math.floor(Math.random() * ops.length)];
+
+                            if (op === "/" && a % b !== 0) continue;
+
+                            const expr = `${a}${op}${b}`;
+                            const result = safeEval(expr);
+                            if (result !== null && result !== targetAnswer) {
+                                expressions.push(expr);
+                            }
+                        }
+
+                    } else {
+                        // ▼ 三項式（9以下の数字、割り切れる式のみ）
+                        while (true) {
+                            const a = Math.floor(Math.random() * 9) + 1;
+                            const b = Math.floor(Math.random() * 9) + 1;
+                            const c = Math.floor(Math.random() * 9) + 1;
+                            const op1 = ops[Math.floor(Math.random() * ops.length)];
+                            const op2 = ops[Math.floor(Math.random() * ops.length)];
+
+                            const expr = `${a}${op1}${b}${op2}${c}`;
+                            const result = safeEval(expr);
+
+                            if (result === null || !isInteger(result)) continue;
+
+                            targetAnswer = result;
+                            expressions.push(expr);
+                            break;
+                        }
+
+                        while (expressions.length < 3) {
+                            const a = Math.floor(Math.random() * 9) + 1;
+                            const b = Math.floor(Math.random() * 9) + 1;
+                            const c = Math.floor(Math.random() * 9) + 1;
+                            const op1 = ops[Math.floor(Math.random() * ops.length)];
+                            const op2 = ops[Math.floor(Math.random() * ops.length)];
+
+                            const expr = `${a}${op1}${b}${op2}${c}`;
+                            const result = safeEval(expr);
+
+                            if (result !== null && result !== targetAnswer && isInteger(result)) {
+                                expressions.push(expr);
+                            }
+                        }
                     }
-                }
-            });
-        }
 
-        // -------------------------------------------------------------
-        // レーン位置の動的計算 (Dynamic Lane Position Calculation)
-        // -------------------------------------------------------------
-        function updateLanePositions() {
-            const gameHeight = game.offsetHeight; // Get current height of #game element in pixels
-
-            // Calculate lane Y coordinates proportionally based on original 300px game height
-            // These are pixel values for player.style.top
-            lanes[0] = gameHeight * (25 / 300); // Original top lane Y was 25px
-            lanes[1] = gameHeight * (125 / 300); // Original middle lane Y was 125px
-            lanes[2] = gameHeight * (225 / 300); // Original bottom lane Y was 225px
-
-            // Update player's position
-            player.style.top = lanes[currentLane] + "px";
-        }
-
-        // -------------------------------------------------------------
-        // ゲーム開始/リトライ/タイトルに戻る (Game Start/Retry/Return to Title)
-        // -------------------------------------------------------------
-        document.getElementById("start-button").addEventListener("click", function() {
-            document.getElementById("title-screen").style.display = "none";
-            game.style.display = "block"; // Show game screen
-            updateGameLayoutAndStart();
-            isAdultMode = false;
-        });
-
-        document.getElementById('adult-mode-button').addEventListener('click', () => {
-            document.getElementById("title-screen").style.display = "none";
-            game.style.display = "block"; // Show game screen
-            updateGameLayoutAndStart();
-            isAdultMode = true;
-        });
-
-        function updateGameLayoutAndStart() {
-            updateLanePositions(); // Recalculate lane positions based on current game screen size
-            player.style.backgroundImage = `url('${selectedSkin}')`;
-            // Reset game state
-            distance = 0;
-            score = 0;
-            lives = 3;
-            combo = 0;
-            baseGameSpeed = INITIAL_GAME_SPEED;
-            speed = INITIAL_GAME_SPEED;
-            currentBaseBGMPlaybackRate = INITIAL_BGM_PLAYBACK_RATE;
-            bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE;
-            isAccelerating = false;
-            updateLivesDisplay();
-            updateComboBar();
-            game.style.backgroundImage = `url('${backgrounds[0]}')`; // Reset background
-            game.style.opacity = 1; // Ensure full opacity
-            bgm.currentTime = 0; // Reset BGM
-
-            // ★追加: ここでisSpawningを確実にfalseにリセットします★
-            isSpawning = false; 
-            
-            // Remove all existing obstacles from the game area before starting a new round
-            document.querySelectorAll('.obstacle').forEach(obstacle => {
-                obstacle.remove();
-            });
-            
-            // Only play BGM if not already started by touch (for first touch case)
-            if (!started) {
-                bgm.volume = 0.005;
-                bgm.play().catch(error => console.log("BGM再生失敗", error));
-                started = true;
-            }
-            spawnChallenge();
-        }
-
-
-        function restartGame() {
-            document.getElementById("ranking-modal").style.display = "none";
-            document.getElementById("overlay").style.display = "none"; // Hide overlay too
-            updateGameLayoutAndStart();
-        }
-
-        function returnToTitle() {
-            document.getElementById("ranking-modal").style.display = "none";
-            document.getElementById("overlay").style.display = "none"; // Hide overlay too
-            document.getElementById("title-screen").style.display = "flex";
-            game.style.display = "none"; // Hide game screen
-            bgm.pause(); // Stop BGM
-            started = false; // Reset BGM started flag
-            // Reset game state for next play
-            score = 0;
-            distance = 0;
-            speed = INITIAL_GAME_SPEED;
-            lives = 3;
-            combo = 0;
-            updateHearts(); // Update heart display
-            updateLivesDisplay(); // Ensure lives display is reset
-            currentLane = 1; // Reset player lane
-            updateLanePositions(); // Recalculate and set player top
-            bgPos = 0; // Reset background position
-            backgroundIndex = 0; // Reset background image
-            game.style.backgroundImage = `url('${backgrounds[backgroundIndex]}')`;
-            bgm.currentTime = 0; // Reset BGM time
-            bgm.playbackRate = INITIAL_BGM_PLAYBACK_RATE; // Reset BGM rate
-            isSpawning = false; // Allow new challenge to spawn
-        }
-
-        // -------------------------------------------------------------
-        // 式をランダム生成 (Generate Random Expressions)
-        // -------------------------------------------------------------
-        function generateExpressions() {
-            const ops = ["+", "-", "*", "/"];
-            const expressions = [];
-
-            function isInteger(n) {
-                return Number.isInteger(n);
-            }
-
-            function safeEval(expr) {
-                try {
-                    const result = eval(expr);
-                    if (!Number.isFinite(result)) return null;
-                    return parseFloat(result.toFixed(2));
-                } catch {
-                    return null;
-                }
-            }
-
-            if (isAdultMode) {
-                const isHardQuestion = (score % 5 === 0); // 5スコアごとにハード
-
-                if (isHardQuestion) {
-                    // ▼ 2項式（50以下で割り切れる式を含む）
+                } else {
+                    // ▼ 通常モード（9以下で割り切れる2項式）
                     while (true) {
-                        const a = Math.floor(Math.random() * 50) + 1;
-                        const b = Math.floor(Math.random() * 50) + 1;
+                        const a = Math.floor(Math.random() * 9) + 1;
+                        const b = Math.floor(Math.random() * 9) + 1;
                         const op = ops[Math.floor(Math.random() * ops.length)];
 
                         if (op === "/" && a % b !== 0) continue;
 
                         const expr = `${a}${op}${b}`;
-                        const answer = safeEval(expr);
-                        if (answer === null) continue;
+                        const result = safeEval(expr);
+                        if (result === null) continue;
 
-                        targetAnswer = answer;
+                        targetAnswer = result;
                         expressions.push(expr);
                         break;
                     }
 
-                    // ダミー作成（異なる答え・整数）
                     while (expressions.length < 3) {
-                        const a = Math.floor(Math.random() * 50) + 1;
-                        const b = Math.floor(Math.random() * 50) + 1;
+                        const a = Math.floor(Math.random() * 9) + 1;
+                        const b = Math.floor(Math.random() * 9) + 1;
                         const op = ops[Math.floor(Math.random() * ops.length)];
 
                         if (op === "/" && a % b !== 0) continue;
@@ -653,375 +721,308 @@
                             expressions.push(expr);
                         }
                     }
-
-                } else {
-                    // ▼ 三項式（9以下の数字、割り切れる式のみ）
-                    while (true) {
-                        const a = Math.floor(Math.random() * 9) + 1;
-                        const b = Math.floor(Math.random() * 9) + 1;
-                        const c = Math.floor(Math.random() * 9) + 1;
-                        const op1 = ops[Math.floor(Math.random() * ops.length)];
-                        const op2 = ops[Math.floor(Math.random() * ops.length)];
-
-                        const expr = `${a}${op1}${b}${op2}${c}`;
-                        const result = safeEval(expr);
-
-                        if (result === null || !isInteger(result)) continue;
-
-                        targetAnswer = result;
-                        expressions.push(expr);
-                        break;
-                    }
-
-                    while (expressions.length < 3) {
-                        const a = Math.floor(Math.random() * 9) + 1;
-                        const b = Math.floor(Math.random() * 9) + 1;
-                        const c = Math.floor(Math.random() * 9) + 1;
-                        const op1 = ops[Math.floor(Math.random() * ops.length)];
-                        const op2 = ops[Math.floor(Math.random() * ops.length)];
-
-                        const expr = `${a}${op1}${b}${op2}${c}`;
-                        const result = safeEval(expr);
-
-                        if (result !== null && result !== targetAnswer && isInteger(result)) {
-                            expressions.push(expr);
-                        }
-                    }
                 }
 
-            } else {
-                // ▼ 通常モード（9以下で割り切れる2項式）
-                while (true) {
-                    const a = Math.floor(Math.random() * 9) + 1;
-                    const b = Math.floor(Math.random() * 9) + 1;
-                    const op = ops[Math.floor(Math.random() * ops.length)];
-
-                    if (op === "/" && a % b !== 0) continue;
-
-                    const expr = `${a}${op}${b}`;
-                    const result = safeEval(expr);
-                    if (result === null) continue;
-
-                    targetAnswer = result;
-                    expressions.push(expr);
-                    break;
-                }
-
-                while (expressions.length < 3) {
-                    const a = Math.floor(Math.random() * 9) + 1;
-                    const b = Math.floor(Math.random() * 9) + 1;
-                    const op = ops[Math.floor(Math.random() * ops.length)];
-
-                    if (op === "/" && a % b !== 0) continue;
-
-                    const expr = `${a}${op}${b}`;
-                    const result = safeEval(expr);
-                    if (result !== null && result !== targetAnswer) {
-                        expressions.push(expr);
-                    }
-                }
+                return expressions.sort(() => Math.random() - 0.5); // シャッフル
             }
+            
+            // -------------------------------------------------------------
+            // 問題を出す (Spawn Challenge)
+            // -------------------------------------------------------------
+            function spawnChallenge() {
+                if (lives <= -1 || !started) return; // Prevent spawning if game over or not started
+                if (isSpawning) return;
+                isSpawning = true;
+                hasAnswered = false;
 
-            return expressions.sort(() => Math.random() - 0.5); // シャッフル
-        }
-        
-        // -------------------------------------------------------------
-        // 問題を出す (Spawn Challenge)
-        // -------------------------------------------------------------
-        function spawnChallenge() {
-            if (lives <= -1 || !started) return; // Prevent spawning if game over or not started
-            if (isSpawning) return;
-            isSpawning = true;
-            hasAnswered = false;
+                const expressions = generateExpressions();
+                targetSpan.textContent = targetAnswer;
 
-            const expressions = generateExpressions();
-            targetSpan.textContent = targetAnswer;
+                // Find the lane for the correct answer
+                const correctLaneIndex = expressions.findIndex(e => eval(e) === targetAnswer);
 
-            // Find the lane for the correct answer
-            const correctLaneIndex = expressions.findIndex(e => eval(e) === targetAnswer);
+                expressions.forEach((expr, i) => {
+                        const obstacle = document.createElement("div");
+                        obstacle.className = "obstacle";
+                        console.log("Original expr:", expr); 
+                        obstacle.textContent = expr
+                            .replace(/\*/g, 'ｘ') // 全ての * を置換
+                            .replace(/\//g, '／') // 全ての / を置換
+                            .replace(/\+/g, '＋') // 全ての + を置換 (注意: + は正規表現で特殊文字なのでエスケープ \ が必要)
+                            .replace(/-/g, '－'); // 全ての - を置換 (注意: - も正規表現で特殊文字なのでエスケープ \ が必要)
+                    obstacle.style.top = lanes[i] + "px"; // Set Y position based on dynamic lanes
 
-            expressions.forEach((expr, i) => {
-                    const obstacle = document.createElement("div");
-                    obstacle.className = "obstacle";
-                    console.log("Original expr:", expr); 
-                    obstacle.textContent = expr
-                        .replace(/\*/g, 'ｘ') // 全ての * を置換
-                        .replace(/\//g, '／') // 全ての / を置換
-                        .replace(/\+/g, '＋') // 全ての + を置換 (注意: + は正規表現で特殊文字なのでエスケープ \ が必要)
-                        .replace(/-/g, '－'); // 全ての - を置換 (注意: - も正規表現で特殊文字なのでエスケープ \ が必要)
-                obstacle.style.top = lanes[i] + "px"; // Set Y position based on dynamic lanes
+                    // Obstacle starts from the right edge of the current game screen width
+                    obstacle.style.left = game.offsetWidth + "px"; 
+                    game.appendChild(obstacle);
 
-                // Obstacle starts from the right edge of the current game screen width
-                obstacle.style.left = game.offsetWidth + "px"; 
-                game.appendChild(obstacle);
+                    let currentObstaclePos = game.offsetWidth; // Initial position based on game width
+                    const obstacleMoveInterval = setInterval(() => {
+                        currentObstaclePos -= speed; // Move obstacle based on current game speed
+                        obstacle.style.left = currentObstaclePos + "px";
 
-                let currentObstaclePos = game.offsetWidth; // Initial position based on game width
-                const obstacleMoveInterval = setInterval(() => {
-                    currentObstaclePos -= speed; // Move obstacle based on current game speed
-                    obstacle.style.left = currentObstaclePos + "px";
+                        const playerVisualLeft = game.offsetWidth * (50 / 800); 
+                        const playerVisualWidth = game.offsetWidth * (50 / 800); 
+                        const obstacleVisualWidth = game.offsetWidth * (100 / 800); 
 
-                    const playerVisualLeft = game.offsetWidth * (50 / 800); 
-                    const playerVisualWidth = game.offsetWidth * (50 / 800); 
-                    const obstacleVisualWidth = game.offsetWidth * (100 / 800); 
+                        // Check for collision: obstacle overlaps with player horizontally and is in the current lane
+                        if (
+                            currentObstaclePos < (playerVisualLeft + playerVisualWidth * 0.8) && // Obstacle's right edge passes player's front
+                            (currentObstaclePos + obstacleVisualWidth * 0.8) > playerVisualLeft && // Obstacle's left edge passes player's back
+                            i === currentLane && !hasAnswered // Check if player is in the correct lane and hasn't answered yet
+                        ) {
+                            hasAnswered = true; // Mark as answered to prevent multiple hits
+                            clearInterval(obstacleMoveInterval); // Stop this obstacle's movement
+                            if (obstacle.parentNode === game) {
+                                game.removeChild(obstacle); // Remove obstacle from DOM
+                            }
 
-                    // Check for collision: obstacle overlaps with player horizontally and is in the current lane
-                    if (
-                        currentObstaclePos < (playerVisualLeft + playerVisualWidth * 0.8) && // Obstacle's right edge passes player's front
-                        (currentObstaclePos + obstacleVisualWidth * 0.8) > playerVisualLeft && // Obstacle's left edge passes player's back
-                        i === currentLane && !hasAnswered // Check if player is in the correct lane and hasn't answered yet
-                    ) {
-                        hasAnswered = true; // Mark as answered to prevent multiple hits
-                        clearInterval(obstacleMoveInterval); // Stop this obstacle's movement
-                        if (obstacle.parentNode === game) {
-                            game.removeChild(obstacle); // Remove obstacle from DOM
-                        }
+                            if (!isAccelerating) {
+                                speed = baseGameSpeed;
+                                bgm.playbackRate = currentBaseBGMPlaybackRate;
+                            }
+                            if (i === correctLaneIndex) { // Correct answer
+                                score++;
+                                combo++;
+                                updateComboBar();
+                                seCorrect.currentTime = 0;
+                                seCorrect.volume = 1.0;
+                                seCorrect.play();
 
-                        if (!isAccelerating) {
-                            speed = baseGameSpeed;
-                            bgm.playbackRate = currentBaseBGMPlaybackRate;
-                        }
-                        if (i === correctLaneIndex) { // Correct answer
-                            score++;
-                            combo++;
-                            updateComboBar();
-                            seCorrect.currentTime = 0;
-                            seCorrect.volume = 1.0;
-                            seCorrect.play();
+                                // Heal life every 10 combo, up to max 3
+                                if (combo % 10 === 0 && lives < 3) {
+                                    lives++;
+                                    updateLivesDisplay();
+                                    updateHearts();
+                                    // Combo bar flash animation
+                                    const bar = document.getElementById("combo-bar");
+                                    bar.classList.add("combo-flash");
+                                    setTimeout(() => bar.classList.remove("combo-flash"), 500);
+                                }
 
-                            // Heal life every 10 combo, up to max 3
-                            if (combo % 10 === 0 && lives < 3) {
-                                lives++;
+                                // Increase game speed and BGM rate
+                                if (score % 2 === 0) {
+                                    baseGameSpeed += (score <= 6) ? 0.45 : (score <= 14) ? 0.38 : (score < 30) ? 0.15 : 0.1;
+                                    currentBaseBGMPlaybackRate += 0.015;
+
+                                }
+
+                                // Change background every 10 score
+                                if (score % 10 === 0) {
+                                    backgroundIndex = (backgroundIndex + 1) % backgrounds.length;
+                                    game.style.opacity = 0; // Start fade out
+                                    setTimeout(() => { // Short delay before changing image
+                                        game.style.backgroundImage = `url('${backgrounds[backgroundIndex]}')`;
+                                        game.style.opacity = 1; // Fade in new background
+                                    }, 300); // Match CSS transition duration
+                                }
+                            } else { // Wrong answer
+                                combo = 0;
+                                updateComboBar();
+                                lives--;
                                 updateLivesDisplay();
                                 updateHearts();
-                                // Combo bar flash animation
-                                const bar = document.getElementById("combo-bar");
-                                bar.classList.add("combo-flash");
-                                setTimeout(() => bar.classList.remove("combo-flash"), 500);
+                                seWrong.currentTime = 0;
+                                seWrong.volume = 1.0;
+                                seWrong.play();
+                                flashPlayerRed();
+
+                                if (lives <= -1) { // Game Over
+                                    fadeOutBGM();
+                                    const rankings = updateRanking(distance, isAdultMode, selectedSkin);
+                                    showRanking(rankings);
+                                    return;
+                                }
                             }
-
-                            // Increase game speed and BGM rate
-                            if (score % 2 === 0) {
-                                baseGameSpeed += (score <= 6) ? 0.45 : (score <= 14) ? 0.38 : (score < 30) ? 0.15 : 0.1;
-                                currentBaseBGMPlaybackRate += 0.015;
-
-                            }
-
-                            // Change background every 10 score
-                            if (score % 10 === 0) {
-                                backgroundIndex = (backgroundIndex + 1) % backgrounds.length;
-                                game.style.opacity = 0; // Start fade out
-                                setTimeout(() => { // Short delay before changing image
-                                    game.style.backgroundImage = `url('${backgrounds[backgroundIndex]}')`;
-                                    game.style.opacity = 1; // Fade in new background
-                                }, 300); // Match CSS transition duration
-                            }
-                        } else { // Wrong answer
-                            combo = 0;
-                            updateComboBar();
-                            lives--;
-                            updateLivesDisplay();
-                            updateHearts();
-                            seWrong.currentTime = 0;
-                            seWrong.volume = 1.0;
-                            seWrong.play();
-                            flashPlayerRed();
-
-                            if (lives <= -1) { // Game Over
-                                fadeOutBGM();
-                                const rankings = updateRanking(distance, isAdultMode, selectedSkin);
-                                showRanking(rankings);
-                                return;
-                            }
-                        }
-                        // After an answer (correct or wrong), spawn next challenge after a delay
-                        setTimeout(() => {
-                            isSpawning = false;
-                            spawnChallenge();
-                        }, 4 * 1000 / baseGameSpeed); // Delay scales with speed
-                    }
-
-                    // Remove obstacle if it goes off-screen without being hit
-                    if (currentObstaclePos < -obstacleVisualWidth && obstacle.parentNode === game) {
-                        clearInterval(obstacleMoveInterval);
-                        game.removeChild(obstacle);
-
-                        // If the correct obstacle went off-screen without being answered
-                        if (!hasAnswered && i === correctLaneIndex) { 
-                            combo = 0;
-                            updateComboBar();
-                            lives--;
-                            updateLivesDisplay();
-                            updateHearts();
-                            seWrong.currentTime = 0;
-                            seWrong.volume = 1.0;
-                            seWrong.play();
-                            flashPlayerRed();
-
-                            if (lives <= -1) { // Game Over
-                                fadeOutBGM();
-                                const rankings = updateRanking(distance, isAdultMode, selectedSkin);
-                                showRanking(rankings);
-                                return;
-                            }
-                            // Spawn next challenge after missing
+                            // After an answer (correct or wrong), spawn next challenge after a delay
                             setTimeout(() => {
                                 isSpawning = false;
                                 spawnChallenge();
-                            }, 4 * 1000 / baseGameSpeed); 
-                        } else if (!hasAnswered) {
-                            // If player hasn't answered yet and any obstacle went off-screen,
-                            // we need to ensure the next challenge spawns eventually.
-                            // This case covers incorrect obstacles passing or correct ones being missed.
-                            setTimeout(() => {
-                                isSpawning = false;
-                                spawnChallenge();
-                            }, 4 * 1000 / baseGameSpeed); 
+                            }, 4 * 1000 / baseGameSpeed); // Delay scales with speed
                         }
+
+                        // Remove obstacle if it goes off-screen without being hit
+                        if (currentObstaclePos < -obstacleVisualWidth && obstacle.parentNode === game) {
+                            clearInterval(obstacleMoveInterval);
+                            game.removeChild(obstacle);
+
+                            // If the correct obstacle went off-screen without being answered
+                            if (!hasAnswered && i === correctLaneIndex) { 
+                                combo = 0;
+                                updateComboBar();
+                                lives--;
+                                updateLivesDisplay();
+                                updateHearts();
+                                seWrong.currentTime = 0;
+                                seWrong.volume = 1.0;
+                                seWrong.play();
+                                flashPlayerRed();
+
+                                if (lives <= -1) { // Game Over
+                                    fadeOutBGM();
+                                    const rankings = updateRanking(distance, isAdultMode, selectedSkin);
+                                    showRanking(rankings);
+                                    return;
+                                }
+                                // Spawn next challenge after missing
+                                setTimeout(() => {
+                                    isSpawning = false;
+                                    spawnChallenge();
+                                }, 4 * 1000 / baseGameSpeed); 
+                            } else if (!hasAnswered) {
+                                // If player hasn't answered yet and any obstacle went off-screen,
+                                // we need to ensure the next challenge spawns eventually.
+                                // This case covers incorrect obstacles passing or correct ones being missed.
+                                setTimeout(() => {
+                                    isSpawning = false;
+                                    spawnChallenge();
+                                }, 4 * 1000 / baseGameSpeed); 
+                            }
+                        }
+                    }, 20); // Obstacle movement interval
+                });
+            }
+
+
+            // -------------------------------------------------------------
+            // ライフ表示 & ダメージエフェクト (Lives Display & Damage Effect)
+            // -------------------------------------------------------------
+            function updateLivesDisplay() {
+                livesDisplay.textContent = '❤️'.repeat(Math.max(0, lives));
+            }
+
+            function updateHearts() { // Duplicate of updateLivesDisplay, kept for compatibility with existing calls
+                livesDisplay.textContent = '❤️'.repeat(Math.max(0, lives));
+            }
+
+            function flashPlayerRed(times = 3, interval = 100) {
+                let count = 0;
+                const flash = () => {
+                    // Alternates between a dark filter and no filter
+                    player.style.filter = count % 2 === 0 ? "brightness(0.4)" : "none";
+                    count++;
+                    if (count < times * 2) {
+                        setTimeout(flash, interval);
+                    } else {
+                        player.style.filter = "none"; // Ensure filter is reset at the end
                     }
-                }, 20); // Obstacle movement interval
-            });
-        }
+                };
+                flash();
+            }
 
+            // -------------------------------------------------------------
+            // コンボゲージ (Combo Bar)
+            // -------------------------------------------------------------
+            function updateComboBar() {
+                const bar = document.getElementById("combo-bar");
+                const percentage = Math.min((combo % 10) * 10, 100); // Fills up to 100% for 10 combos
+                bar.style.width = `${percentage}%`;
+            }
 
-        // -------------------------------------------------------------
-        // ライフ表示 & ダメージエフェクト (Lives Display & Damage Effect)
-        // -------------------------------------------------------------
-        function updateLivesDisplay() {
-            livesDisplay.textContent = '❤️'.repeat(Math.max(0, lives));
-        }
+            // -------------------------------------------------------------
+            // ランキングシステム (Ranking System)
+            // -------------------------------------------------------------
+            function getRankings(isAdult) {
+                const key = isAdult ? 'adultRankings' : 'normalRankings';
+                return JSON.parse(localStorage.getItem(key) || '[]');
+            }
 
-        function updateHearts() { // Duplicate of updateLivesDisplay, kept for compatibility with existing calls
-            livesDisplay.textContent = '❤️'.repeat(Math.max(0, lives));
-        }
+            function saveRankings(rankings, isAdult) {
+                const key = isAdult ? 'adultRankings' : 'normalRankings';
+                localStorage.setItem(key, JSON.stringify(rankings));
+            }
 
-        function flashPlayerRed(times = 3, interval = 100) {
-            let count = 0;
-            const flash = () => {
-                // Alternates between a dark filter and no filter
-                player.style.filter = count % 2 === 0 ? "brightness(0.4)" : "none";
-                count++;
-                if (count < times * 2) {
-                    setTimeout(flash, interval);
-                } else {
-                    player.style.filter = "none"; // Ensure filter is reset at the end
-                }
-            };
-            flash();
-        }
+            function updateRanking(newDistance, isAdult, playerSkin) {
+                let rankings = getRankings(isAdult);
+                // Store score as an integer to prevent floating point issues with sorting
+                rankings.push({ score: Math.floor(newDistance), skin: playerSkin }); 
+                rankings.sort((a, b) => b.score - a.score); // Sort descending by score
+                rankings = rankings.slice(0, 10); // Keep top 10 (or desired number)
+                saveRankings(rankings, isAdult);
+                return rankings;
+            }
 
-        // -------------------------------------------------------------
-        // コンボゲージ (Combo Bar)
-        // -------------------------------------------------------------
-        function updateComboBar() {
-            const bar = document.getElementById("combo-bar");
-            const percentage = Math.min((combo % 10) * 10, 100); // Fills up to 100% for 10 combos
-            bar.style.width = `${percentage}%`;
-        }
+            function showRanking(rankings) {
+                const modal = document.getElementById("ranking-modal");
+                const finalScore = document.getElementById("final-score");
+                const rankingList = document.getElementById("ranking-list");
 
-        // -------------------------------------------------------------
-        // ランキングシステム (Ranking System)
-        // -------------------------------------------------------------
-        function getRankings(isAdult) {
-            const key = isAdult ? 'adultRankings' : 'normalRankings';
-            return JSON.parse(localStorage.getItem(key) || '[]');
-        }
-
-        function saveRankings(rankings, isAdult) {
-            const key = isAdult ? 'adultRankings' : 'normalRankings';
-            localStorage.setItem(key, JSON.stringify(rankings));
-        }
-
-        function updateRanking(newDistance, isAdult, playerSkin) {
-            let rankings = getRankings(isAdult);
-            // Store score as an integer to prevent floating point issues with sorting
-            rankings.push({ score: Math.floor(newDistance), skin: playerSkin }); 
-            rankings.sort((a, b) => b.score - a.score); // Sort descending by score
-            rankings = rankings.slice(0, 10); // Keep top 10 (or desired number)
-            saveRankings(rankings, isAdult);
-            return rankings;
-        }
-
-        function showRanking(rankings) {
-            const modal = document.getElementById("ranking-modal");
-            const finalScore = document.getElementById("final-score");
-            const rankingList = document.getElementById("ranking-list");
-
-            const myScore = Math.floor(distance);
-            // Find player's rank. If not found (e.g., list is empty), it will be -1.
-            const myRank = rankings.findIndex(entry => entry.score === myScore && entry.skin === selectedSkin) + 1; 
-            
-            // Adjusted final score text
-            finalScore.textContent = `あなたのスコア: ${myScore}m ${myRank > 0 ? `（${myRank}位）` : ''}`;
-
-            rankingList.innerHTML = ""; // Clear previous list
-            const medals = ["🥇", "🥈", "🥉"];
-
-            // Display top 7 or fewer if less are ranked
-            rankings.slice(0, 3).forEach((entry, i) => {
-                const li = document.createElement("li");
+                const myScore = Math.floor(distance);
+                // Find player's rank. If not found (e.g., list is empty), it will be -1.
+                const myRank = rankings.findIndex(entry => entry.score === myScore && entry.skin === selectedSkin) + 1; 
                 
-                // Add medal or rank number
-                const rankText = document.createElement("span");
-                if (i < medals.length) {
-                    rankText.textContent = `${medals[i]} ${entry.score}m`;
-                } else {
-                    rankText.textContent = `${i + 1}位: ${entry.score}m`;
-                }
+                // Adjusted final score text
+                finalScore.textContent = `あなたのスコア: ${myScore}m ${myRank > 0 ? `（${myRank}位）` : ''}`;
 
-                // Skin image
-                const img = document.createElement("img");
-                img.src = entry.skin || "default.gif"; // Fallback in case skin is missing
-                img.alt = "skin";
-                // Scale image based on current game area width, similar to player/obstacle
-                img.style.width = `${game.offsetWidth * (18 / 800)}px`; // 変更: 32pxから24pxに縮小
-                img.style.height = `${game.offsetWidth * (18 / 800)}px`; // Keep it square, 変更: 32pxから24pxに縮小
-                img.style.verticalAlign = "middle";
-                img.style.marginLeft = `${game.offsetWidth * (4 / 800)}px`; // 変更: 8pxから6pxに縮小
-                img.style.borderRadius = `${game.offsetWidth * (3 / 800)}px`; // 変更: 5pxから4pxに縮小
+                rankingList.innerHTML = ""; // Clear previous list
+                const medals = ["🥇", "🥈", "🥉"];
 
-                li.appendChild(rankText);
-                li.appendChild(img);
-                rankingList.appendChild(li);
+                // Display top 7 or fewer if less are ranked
+                rankings.slice(0, 3).forEach((entry, i) => {
+                    const li = document.createElement("li");
+                    
+                    // Add medal or rank number
+                    const rankText = document.createElement("span");
+                    if (i < medals.length) {
+                        rankText.textContent = `${medals[i]} ${entry.score}m`;
+                    } else {
+                        rankText.textContent = `${i + 1}位: ${entry.score}m`;
+                    }
+
+                    // Skin image
+                    const img = document.createElement("img");
+                    img.src = entry.skin || "default.gif"; // Fallback in case skin is missing
+                    img.alt = "skin";
+                    // Scale image based on current game area width, similar to player/obstacle
+                    img.style.width = `${game.offsetWidth * (18 / 800)}px`; // 変更: 32pxから24pxに縮小
+                    img.style.height = `${game.offsetWidth * (18 / 800)}px`; // Keep it square, 変更: 32pxから24pxに縮小
+                    img.style.verticalAlign = "middle";
+                    img.style.marginLeft = `${game.offsetWidth * (4 / 800)}px`; // 変更: 8pxから6pxに縮小
+                    img.style.borderRadius = `${game.offsetWidth * (3 / 800)}px`; // 変更: 5pxから4pxに縮小
+
+                    li.appendChild(rankText);
+                    li.appendChild(img);
+                    rankingList.appendChild(li);
+                });
+
+                modal.style.display = "block";
+                document.getElementById("overlay").style.display = "block"; // Show overlay
+            }
+
+            // -------------------------------------------------------------
+            // BGMフェードアウト (BGM Fade Out)
+            // -------------------------------------------------------------
+            function fadeOutBGM() {
+                let volume = bgm.volume;
+                const fade = setInterval(() => {
+                    if (volume > 0.01) {
+                        volume -= 0.01;
+                        bgm.volume = volume;
+                    } else {
+                        clearInterval(fade);
+                        bgm.pause();
+                        bgm.currentTime = 0; // Reset BGM time after fade
+                        bgm.volume = 0.02; // Reset volume for next play
+                    }
+                }, 50);
+            }
+
+            // -------------------------------------------------------------
+            // 初期化処理 (Initialization)
+            // -------------------------------------------------------------
+            // Initial setup on page load
+            document.addEventListener('DOMContentLoaded', () => {
+                selectSkin(selectedSkin); // Apply border to default skin
+                updateLivesDisplay(); // Initialize lives display
+                updateComboBar(); // Initialize combo bar
+                // updateLanePositions will be called on game start, as game.offsetHeight is 0 before display block
             });
 
-            modal.style.display = "block";
-            document.getElementById("overlay").style.display = "block"; // Show overlay
-        }
-
-        // -------------------------------------------------------------
-        // BGMフェードアウト (BGM Fade Out)
-        // -------------------------------------------------------------
-        function fadeOutBGM() {
-            let volume = bgm.volume;
-            const fade = setInterval(() => {
-                if (volume > 0.01) {
-                    volume -= 0.01;
-                    bgm.volume = volume;
-                } else {
-                    clearInterval(fade);
-                    bgm.pause();
-                    bgm.currentTime = 0; // Reset BGM time after fade
-                    bgm.volume = 0.02; // Reset volume for next play
-                }
-            }, 50);
-        }
-
-        // -------------------------------------------------------------
-        // 初期化処理 (Initialization)
-        // -------------------------------------------------------------
-        // Initial setup on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            selectSkin(selectedSkin); // Apply border to default skin
-            updateLivesDisplay(); // Initialize lives display
-            updateComboBar(); // Initialize combo bar
-            // updateLanePositions will be called on game start, as game.offsetHeight is 0 before display block
-        });
-
-        // Add a resize event listener to update lane positions
-        window.addEventListener('resize', () => {
-            updateLanePositions(); // Recalculate lane positions when window is resized
-            selectSkin(selectedSkin); // Reapply border for selected skin (in case vw changes affected it)
-        });
-    </script>
-</body>
+            // Add a resize event listener to update lane positions
+            window.addEventListener('resize', () => {
+                updateLanePositions(); // Recalculate lane positions when window is resized
+                selectSkin(selectedSkin); // Reapply border for selected skin (in case vw changes affected it)
+            });
+        </script>
+    </body>
 </html>
