@@ -603,45 +603,128 @@
         function generateExpressions() {
             const ops = ["+", "-", "*", "/"];
             const expressions = [];
-            let maxNum = isAdultMode ? 50 : 9;
 
-            // Generate correct expression
-            let a, b, op, expr, answer;
-            do {
-                a = Math.floor(Math.random() * maxNum) + 1;
-                b = Math.floor(Math.random() * maxNum) + 1;
-                op = ops[Math.floor(Math.random() * ops.length)];
-                expr = `${a}${op}${b}`;
-                try {
-                    answer = eval(expr);
-                } catch (e) {
-                    answer = NaN; 
-                }
-                // Ensure division results in an integer and answer is a finite number
-            } while ((op === "/" && a % b !== 0) || !Number.isFinite(answer));
-
-            targetAnswer = answer;
-            expressions.push(expr);
-
-            // Generate incorrect expressions
-            while (expressions.length < 3) {
-                let a2, b2, op2, expr2, res2;
-                do {
-                    a2 = Math.floor(Math.random() * maxNum) + 1;
-                    b2 = Math.floor(Math.random() * maxNum) + 1;
-                    op2 = ops[Math.floor(Math.random() * ops.length)];
-                    expr2 = `${a2}${op2}${b2}`;
-                    try {
-                        res2 = eval(expr2);
-                    } catch (e) {
-                        res2 = NaN;
-                    }
-                } while ((op2 === "/" && a2 % b2 !== 0) || res2 === targetAnswer || !Number.isFinite(res2) || expressions.includes(expr2));
-                expressions.push(expr2);
+            function isInteger(n) {
+                return Number.isInteger(n);
             }
-            return expressions.sort(() => Math.random() - 0.5);
-        }
 
+            function safeEval(expr) {
+                try {
+                    const result = eval(expr);
+                    if (!Number.isFinite(result)) return null;
+                    return parseFloat(result.toFixed(2));
+                } catch {
+                    return null;
+                }
+            }
+
+            if (isAdultMode) {
+                const isHardQuestion = (score % 5 === 0); // 5スコアごとにハード
+
+                if (isHardQuestion) {
+                    // ▼ 2項式（50以下で割り切れる式を含む）
+                    while (true) {
+                        const a = Math.floor(Math.random() * 50) + 1;
+                        const b = Math.floor(Math.random() * 50) + 1;
+                        const op = ops[Math.floor(Math.random() * ops.length)];
+
+                        if (op === "/" && a % b !== 0) continue;
+
+                        const expr = `${a}${op}${b}`;
+                        const answer = safeEval(expr);
+                        if (answer === null) continue;
+
+                        targetAnswer = answer;
+                        expressions.push(expr);
+                        break;
+                    }
+
+                    // ダミー作成（異なる答え・整数）
+                    while (expressions.length < 3) {
+                        const a = Math.floor(Math.random() * 50) + 1;
+                        const b = Math.floor(Math.random() * 50) + 1;
+                        const op = ops[Math.floor(Math.random() * ops.length)];
+
+                        if (op === "/" && a % b !== 0) continue;
+
+                        const expr = `${a}${op}${b}`;
+                        const result = safeEval(expr);
+                        if (result !== null && result !== targetAnswer) {
+                            expressions.push(expr);
+                        }
+                    }
+
+                } else {
+                    // ▼ 三項式（9以下の数字、割り切れる式のみ）
+                    while (true) {
+                        const a = Math.floor(Math.random() * 9) + 1;
+                        const b = Math.floor(Math.random() * 9) + 1;
+                        const c = Math.floor(Math.random() * 9) + 1;
+                        const op1 = ops[Math.floor(Math.random() * ops.length)];
+                        const op2 = ops[Math.floor(Math.random() * ops.length)];
+
+                        const expr = `${a}${op1}${b}${op2}${c}`;
+                        const result = safeEval(expr);
+
+                        if (result === null || !isInteger(result)) continue;
+
+                        targetAnswer = result;
+                        expressions.push(expr);
+                        break;
+                    }
+
+                    while (expressions.length < 3) {
+                        const a = Math.floor(Math.random() * 9) + 1;
+                        const b = Math.floor(Math.random() * 9) + 1;
+                        const c = Math.floor(Math.random() * 9) + 1;
+                        const op1 = ops[Math.floor(Math.random() * ops.length)];
+                        const op2 = ops[Math.floor(Math.random() * ops.length)];
+
+                        const expr = `${a}${op1}${b}${op2}${c}`;
+                        const result = safeEval(expr);
+
+                        if (result !== null && result !== targetAnswer && isInteger(result)) {
+                            expressions.push(expr);
+                        }
+                    }
+                }
+
+            } else {
+                // ▼ 通常モード（9以下で割り切れる2項式）
+                while (true) {
+                    const a = Math.floor(Math.random() * 9) + 1;
+                    const b = Math.floor(Math.random() * 9) + 1;
+                    const op = ops[Math.floor(Math.random() * ops.length)];
+
+                    if (op === "/" && a % b !== 0) continue;
+
+                    const expr = `${a}${op}${b}`;
+                    const result = safeEval(expr);
+                    if (result === null) continue;
+
+                    targetAnswer = result;
+                    expressions.push(expr);
+                    break;
+                }
+
+                while (expressions.length < 3) {
+                    const a = Math.floor(Math.random() * 9) + 1;
+                    const b = Math.floor(Math.random() * 9) + 1;
+                    const op = ops[Math.floor(Math.random() * ops.length)];
+
+                    if (op === "/" && a % b !== 0) continue;
+
+                    const expr = `${a}${op}${b}`;
+                    const result = safeEval(expr);
+                    if (result !== null && result !== targetAnswer) {
+                        expressions.push(expr);
+                    }
+                }
+            }
+
+            return expressions.sort(() => Math.random() - 0.5); // シャッフル
+        }
+        
         // -------------------------------------------------------------
         // 問題を出す (Spawn Challenge)
         // -------------------------------------------------------------
@@ -658,9 +741,14 @@
             const correctLaneIndex = expressions.findIndex(e => eval(e) === targetAnswer);
 
             expressions.forEach((expr, i) => {
-                const obstacle = document.createElement("div");
-                obstacle.className = "obstacle";
-                obstacle.textContent = expr.replace('*', 'ｘ').replace('/', '／').replace('+', '＋').replace('-', 'ー');
+                    const obstacle = document.createElement("div");
+                    obstacle.className = "obstacle";
+                    console.log("Original expr:", expr); 
+                    obstacle.textContent = expr
+                        .replace(/\*/g, 'ｘ') // 全ての * を置換
+                        .replace(/\//g, '／') // 全ての / を置換
+                        .replace(/\+/g, '＋') // 全ての + を置換 (注意: + は正規表現で特殊文字なのでエスケープ \ が必要)
+                        .replace(/-/g, '－'); // 全ての - を置換 (注意: - も正規表現で特殊文字なのでエスケープ \ が必要)
                 obstacle.style.top = lanes[i] + "px"; // Set Y position based on dynamic lanes
 
                 // Obstacle starts from the right edge of the current game screen width
@@ -688,6 +776,10 @@
                             game.removeChild(obstacle); // Remove obstacle from DOM
                         }
 
+                        if (!isAccelerating) {
+                            speed = baseGameSpeed;
+                            bgm.playbackRate = currentBaseBGMPlaybackRate;
+                        }
                         if (i === correctLaneIndex) { // Correct answer
                             score++;
                             combo++;
@@ -711,10 +803,7 @@
                             if (score % 2 === 0) {
                                 baseGameSpeed += (score <= 6) ? 0.45 : (score <= 14) ? 0.38 : (score < 30) ? 0.15 : 0.1;
                                 currentBaseBGMPlaybackRate += 0.015;
-                                if (!isAccelerating) {
-                                    speed = baseGameSpeed;
-                                    bgm.playbackRate = currentBaseBGMPlaybackRate;
-                                }
+
                             }
 
                             // Change background every 10 score
