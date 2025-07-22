@@ -299,6 +299,117 @@
         /* 縦画面モードの調整 (Portrait Mode Adjustments) */
         /* ------------------------------------------------------------- */
         @media (orientation: portrait) {
+            #title-screen {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                width: 100vw; /* Occupy full viewport width */
+                background-color: #e0f7fa;
+                position: fixed; /* Keep it fixed over the whole screen */
+                top: 0;
+                left: 0;
+                z-index: 2000; /* Ensure it's on top */
+            }
+            #title-screen h1 {
+                font-size: 4.4vw; /* 変更: 6vwから5vwに縮小 */
+                color: #333;
+            }
+            #start-button, #adult-mode-button {
+                margin-top: 2.4vh; 
+                padding: 1.8vh 3.0vw; 
+                font-size: 2.2vw; 
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 0.8vw; 
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            #adult-mode-button {
+                background-color: #f44336;
+            }
+            #start-button:hover, #adult-mode-button:hover {
+                background-color: #45a049;
+            }
+
+            /* Skin selection modal */
+            #skin-select {
+                margin-top: 2.2vh; /* 変更: 2.5vhから2.2vhに縮小 */
+            }
+            #skin-select p {
+                font-size: 2.4vw; /* 変更: 2.5vwから2.2vwに縮小 */
+            }
+            #skin-select div {
+                display: flex;
+                gap: 0.8vw; /* 変更: 1vwから0.8vwに縮小 */
+                margin-top: 0.8vh; /* 変更: 1vhから0.8vhに縮小 */
+            }
+            .skin-option {
+                width: 6vw; /* 変更: 6vwから5vwに縮小 */
+                height: 6vw; /* 変更: 6vwから5vwに縮小 */
+                cursor: pointer;
+                border: 0.2vw solid transparent; /* 変更: 0.25vwから0.2vwに縮小 */
+                border-radius: 0.8vw; /* 変更: 1vwから0.8vwに縮小 */
+            }
+            .skin-option:hover {
+                border-color: #4CAF50;
+            }
+
+            #ranking-modal {
+                display: none;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 3.5vh 3.5vw; /* 変更: 4vh 4vw から縮小 */
+                border: 0.2vw solid #000; /* 変更: 0.25vwから0.2vwに縮小 */
+                border-radius: 1.8vw; /* 変更: 2vwから1.8vwに縮小 */
+                z-index: 1000;
+                width: 65vw; /* 変更: 70vwから65vwに縮小 */
+                max-width: 380px; /* 変更: 400pxから380pxに縮小 */
+            }
+            #ranking-modal h2 {
+                font-size: 3.4vw; /* 変更: 4vwから3.5vwに縮小 */
+                margin-bottom: 1.8vh; /* 変更: 2vhから1.8vhに縮小 */
+            }
+            #ranking-modal p, #ranking-modal h3 {
+                font-size: 2.4vw; /* 変更: 2.5vwから2.2vwに縮小 */
+                margin-bottom: 0.8vh; /* 変更: 1vhから0.8vhに縮小 */
+            }
+            #ranking-list {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding-left: 0;
+                list-style: none;
+                margin-top: 0.8vh;
+                margin-bottom: 1.8vh;
+            }
+            #ranking-list li {
+                margin: 0.6vh 0; /* 変更: 0.8vhから0.6vhに縮小 */
+                font-size: 2.0vw; /* 変更: 2vwから1.8vwに縮小 */
+                font-weight: bold;
+                color: #333;
+            }
+            #ranking-modal button {
+                margin-top: 2.2vh; /* 変更: 2.5vhから2.2vhに縮小 */
+                padding: 1.3vh 2.8vw; /* 変更: 1.5vh 3vw から縮小 */
+                font-size: 2.2vw; /* 変更: 2.2vwから2vwに縮小 */
+                background: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 0.8vw; /* 変更: 1vwから0.8vwに縮小 */
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            #ranking-modal button:hover {
+                background: #45a049;
+            }
+
             #game {
                 position: relative;
                 aspect-ratio: 8 / 4; /* Maintain 800:300 ratio */
@@ -333,7 +444,7 @@
             /* ゲームUI要素 (Game UI Elements) */
             h1 { /* "↑↑でレーン移動！ →で加速" heading */
                 /* 縦画面では高さを基準にフォントサイズを調整 (vh) */
-                font-size: 3.5vh; /* 横画面のvwよりも大きく見えるように調整 */
+                font-size: 3.2vh; /* 横画面のvwよりも大きく見えるように調整 */
                 margin-top: 1vh;
                 margin-bottom: 1vh;
             }
@@ -377,7 +488,7 @@
             /* 障害物 (Obstacles) */
             .obstacle {
                 width: 20%; /* 縦画面での幅を調整 */
-                height: 30%; /* 縦画面での高さを調整 */
+                height: 10%; /* 縦画面での高さを調整 */
                 font-size: 2vh; /* フォントサイズもvhで調整 */
                 line-height: 100%; /* 高さに対して調整 */
                 border: 0.4vh solid #007acc; /* ボーダーの太さもvhで調整 */
