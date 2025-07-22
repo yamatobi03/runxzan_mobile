@@ -299,6 +299,37 @@
         /* 縦画面モードの調整 (Portrait Mode Adjustments) */
         /* ------------------------------------------------------------- */
         @media (orientation: portrait) {
+            #game {
+                position: relative;
+                aspect-ratio: 8 / 4; /* Maintain 800:300 ratio */
+                width: 90vw; 
+                /* max-width: px;  */
+                
+                background: url('上空.jpg') repeat-x center center;
+                background-size: cover;
+                border: 0.2vw solid #000; 
+                margin: 0 auto; 
+                max-height: 60vh;
+                max-height: 60dvh;
+                box-sizing: border-box;
+                overflow: hidden;
+                background-position: 0 0;
+                
+                display: none; /* Hidden by default, shown on game start */
+            }
+
+            #ui-container {
+                position: absolute;
+                top: 0.5vh; /* 上から1vhの位置に固定（必要に応じて調整） */
+                width: 100%;
+                text-align: center;
+                z-index: 10;
+            }
+
+            #game.fade {
+                transition: opacity 0.3s ease;
+                opacity: 0;
+            }
             /* ゲームUI要素 (Game UI Elements) */
             h1 { /* "↑↑でレーン移動！ →で加速" heading */
                 /* 縦画面では高さを基準にフォントサイズを調整 (vh) */
@@ -307,22 +338,22 @@
                 margin-bottom: 1vh;
             }
             #question {
-                font-size: 2.8vh;
+                font-size: 2.2vh;
                 margin-top: 0.5vh;
                 margin-bottom: 0.5vh;
             }
             #target {
-                font-size: 4.5vh;
+                font-size: 4.2vh;
                 padding: 0 1vh; /* パディングもvhで調整 */
             }
             #distance {
-                font-size: 2.5vh;
+                font-size: 2.3vh;
                 margin-top: 0.8vh;
                 margin-bottom: 0.8vh;
             }
             #lives {
                 height: 6vh; /* ライフ表示を縦に大きくする */
-                font-size: 3vh; /* フォントサイズも大きくする */
+                font-size: 2.5vh; /* フォントサイズも大きくする */
                 line-height: 6vh; /* 縦中央揃えのために高さを合わせる */
                 margin-top: 0.8vh;
                 margin-bottom: 0.8vh;
@@ -346,8 +377,8 @@
             /* 障害物 (Obstacles) */
             .obstacle {
                 width: 20%; /* 縦画面での幅を調整 */
-                height: 10%; /* 縦画面での高さを調整 */
-                font-size: 3vh; /* フォントサイズもvhで調整 */
+                height: 30%; /* 縦画面での高さを調整 */
+                font-size: 2vh; /* フォントサイズもvhで調整 */
                 line-height: 100%; /* 高さに対して調整 */
                 border: 0.4vh solid #007acc; /* ボーダーの太さもvhで調整 */
                 border-radius: 2vh; /* 角丸もvhで調整 */
@@ -365,7 +396,7 @@
                 border: 0.4vh solid #333; /* ボーダーもvhで調整 */
             }
         }
-        
+
         #combo-bar {
             height: 100%;
             width: 0%;
