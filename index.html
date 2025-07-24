@@ -1052,7 +1052,7 @@
                             setTimeout(() => {
                                 isSpawning = false;
                                 spawnChallenge();
-                            }, 6 * 1000 * (baseGameSpeed - 1) / baseGameSpeed); // Delay scales with speed
+                            }, 5 * 1000 * (baseGameSpeed - 1)) / baseGameSpeed ); // Delay scales with speed
                         }
 
                         // Remove obstacle if it goes off-screen without being hit
@@ -1082,7 +1082,7 @@
                                 setTimeout(() => {
                                     isSpawning = false;
                                     spawnChallenge();
-                                }, 6 * 1000 * (baseGameSpeed - 1) / baseGameSpeed); 
+                                }, 5 * 1000 * (baseGameSpeed - 1)) / baseGameSpeed ); 
                             } else if (!hasAnswered) {
                                 // If player hasn't answered yet and any obstacle went off-screen,
                                 // we need to ensure the next challenge spawns eventually.
@@ -1090,7 +1090,7 @@
                                 setTimeout(() => {
                                     isSpawning = false;
                                     spawnChallenge();
-                                }, 6 * 1000 * (baseGameSpeed - 1) / baseGameSpeed); 
+                                }, 5 * 1000 * (baseGameSpeed - 1)) / baseGameSpeed ); 
                             }
                         }
                     }, 25); // Obstacle movement interval
